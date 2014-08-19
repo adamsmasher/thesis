@@ -50,6 +50,10 @@ Inductive step : prefix -> prefix -> Prop :=
    is_context E -> step s1 s2 ->
    step (E s1) (E s2).
 
+Inductive star : prefix -> prefix -> Prop :=
+| StarR p : star p p
+| StarC p p' : step p p' -> star p p'.
+
 End SourceCalculus.
 
 (* lattice stuff influenced by A reflection-based
