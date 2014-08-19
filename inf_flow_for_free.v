@@ -52,7 +52,7 @@ Inductive step : prefix -> prefix -> Prop :=
 
 Inductive star : prefix -> prefix -> Prop :=
 | StarR p : star p p
-| StarC p p' : step p p' -> star p p'.
+| StarC x y z : step x y -> star y z -> star x z.
 
 Fixpoint prefix_match (p1 p2 : prefix) : Prop :=
   match p1, p2 with
