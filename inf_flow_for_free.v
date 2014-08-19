@@ -10,32 +10,43 @@ Section SourceCalculus.
 
 Parameter label : Set.
 
-Inductive term : Type :=
+Inductive prefix : Type :=
+| Hole
 | Const (k : nat)
 | Var (x : var)
-| Abs (s : {bind term})
-| App (s t : term)
-| Let (s : term) (t : {bind term})
-| Label (s : term) (l : label).
+| Abs (s : {bind prefix})
+| App (s t : prefix)
+| Let (s : prefix) (t : {bind prefix})
+| Label (s : prefix) (l : label).
 
-Instance Ids_term : Ids term. derive. Defined.
-Instance Rename_term : Rename term. derive. Defined.
-Instance Subst_type : Subst term. derive. Defined.
-Instance SubstLemmas_term : SubstLemmas term. derive. Defined.
+Instance Ids_prefix : Ids prefix. derive. Defined.
+Instance Rename_prefix : Rename prefix. derive. Defined.
+Instance Subst_prefix : Subst prefix. derive. Defined.
+Instance SubstLemmas_prefix : SubstLemmas prefix. derive. Defined.
+
+Fixpoint is_term (p : prefix) : Prop := match p with
+| Hole => False
+| Const _ => True
+| Var _ => True
+| Abs s => is_term s
+| App s t => is_term s /\ is_term t
+| Let s t => is_term s /\ is_term t
+| Label s _ => is_term s
+end.
 
 (* notion of contexts taken from Proving ML Type Soundness Within Coq by Catherine Dubois *)
 (* for now our contexts are abstract *)
-Definition eval_ctx := term -> term.
+Definition eval_ctx := prefix -> prefix.
 Parameter is_context : eval_ctx -> Prop.
 
-Inductive step : term -> term -> Prop :=
-| Step_beta (s t : term) :
+Inductive step : prefix -> prefix -> Prop :=
+| Step_beta (s t : prefix) :
    step (App (Abs s) t) s.[t/]
-| Step_let (s t : term) :
+| Step_let (s t : prefix) :
    step (Let s t) t.[s/]
-| Step_lift (s t : term) (l : label) :
+| Step_lift (s t : prefix) (l : label) :
    step (App (Label s l) t) (Label (App s t) l)
-| Step_context (s1 s2 : term) (E : eval_ctx) :
+| Step_context (s1 s2 : prefix) (E : eval_ctx) :
    is_context E -> step s1 s2 ->
    step (E s1) (E s2).
 
