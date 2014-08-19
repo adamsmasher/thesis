@@ -66,6 +66,23 @@ Fixpoint prefix_match (p1 p2 : prefix) : Prop :=
   | _, _ => False
   end.
 
+Lemma term_match (p1 p2 : prefix) :
+  is_term p1 -> prefix_match p1 p2 -> p1 = p2.
+Proof.
+  revert p2. induction p1 ; intros ; destruct p2 ; simpl in * ; try contradiction ; subst ; auto.
+  - rewrite (IHp1 s0) ; auto.
+  - destruct H, H0. rewrite (IHp1_1 p2_1), (IHp1_2 p2_2) ; auto.
+  - destruct H, H0. rewrite (IHp0 t0), (IHp1 p2) ; auto.
+  - destruct H0. subst. rewrite (IHp1 p2) ; auto.
+Qed.
+
+Lemma prefix_monotonicity (e e' f : prefix) :
+  prefix_match e e' -> is_term f -> star e f -> star e' f.
+Proof.
+  intros. induction H1 as [e|e].
+  - intros. rewrite (term_match e e') ; try constructor ; assumption.
+Admitted.
+
 End SourceCalculus.
 
 (* lattice stuff influenced by A reflection-based
