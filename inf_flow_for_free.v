@@ -54,6 +54,18 @@ Inductive star : prefix -> prefix -> Prop :=
 | StarR p : star p p
 | StarC p p' : step p p' -> star p p'.
 
+Fixpoint prefix_match (p1 p2 : prefix) : Prop :=
+  match p1, p2 with
+  | Hole, _ => True
+  | Const k1, Const k2 => k1 = k2
+  | Var x1, Var x2 => x1 = x2
+  | Abs s1, Abs s2 => prefix_match s1 s2
+  | App s1 t1, App s2 t2 => prefix_match s1 s2 /\ prefix_match t1 t2
+  | Let s1 t1, Let s2 t2 => prefix_match s1 s2 /\ prefix_match t1 t2
+  | Label s1 l1, Label s2 l2 => prefix_match s1 s2 /\ l1 = l2
+  | _, _ => False
+  end.
+
 End SourceCalculus.
 
 (* lattice stuff influenced by A reflection-based
