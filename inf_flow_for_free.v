@@ -88,7 +88,7 @@ Proof.
   - ainv. asimpl. constructor.
 Admitted.
 
-Lemma match_step (p1 p2 p1' p2' : prefix) :
+Lemma match_step (p1 p2 p1': prefix) :
   prefix_match p1 p2 -> step p1 p1' -> exists p2', step p2 p2' /\ prefix_match p1' p2'.
 Proof.
   intros. destruct H0.
