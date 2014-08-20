@@ -76,6 +76,33 @@ Proof.
   - simpl in H. now rewrite IHprefix_match, H0.
 Qed.
 
+Lemma match_subst s s' t t' :
+  prefix_match s s' -> prefix_match t t' -> prefix_match s.[t/] s'.[t'/].
+Proof.
+  intros. destruct s.
+  - asimpl. constructor.
+  - ainv. asimpl. now constructor.
+  - ainv. asimpl. destruct x2 ; simpl.
+    + exact H0.
+    + now constructor.
+  - ainv. asimpl. constructor.
+Admitted.
+
+Lemma match_step (p1 p2 p1' p2' : prefix) :
+  prefix_match p1 p2 -> step p1 p1' -> exists p2', step p2 p2' /\ prefix_match p1' p2'.
+Proof.
+  intros. destruct H0.
+  - inversion H ; subst. inversion H2 ; subst. exists s0.[t2/]. split.
+    + constructor.
+    + apply match_subst ; assumption.
+  - inversion H ; subst. exists t2.[s2/]. split.
+    + constructor.
+    + apply match_subst ; assumption.
+  - inversion H ; subst. inversion H2 ; subst. exists (Label (App s0 t2) l2). split ; constructor ; auto.
+    constructor ; assumption.
+  -
+Admitted.
+
 Lemma prefix_monotonicity (e e' f : prefix) :
   prefix_match e e' -> is_term f -> star e f -> star e' f.
 Proof.
