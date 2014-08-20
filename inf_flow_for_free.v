@@ -54,26 +54,26 @@ Inductive star : prefix -> prefix -> Prop :=
 | StarR p : star p p
 | StarC x y z : step x y -> star y z -> star x z.
 
-Fixpoint prefix_match (p1 p2 : prefix) : Prop :=
-  match p1, p2 with
-  | Hole, _ => True
-  | Const k1, Const k2 => k1 = k2
-  | Var x1, Var x2 => x1 = x2
-  | Abs s1, Abs s2 => prefix_match s1 s2
-  | App s1 t1, App s2 t2 => prefix_match s1 s2 /\ prefix_match t1 t2
-  | Let s1 t1, Let s2 t2 => prefix_match s1 s2 /\ prefix_match t1 t2
-  | Label s1 l1, Label s2 l2 => prefix_match s1 s2 /\ l1 = l2
-  | _, _ => False
-  end.
+Inductive prefix_match : prefix -> prefix -> Prop :=
+| HoleMatch p : prefix_match Hole p
+| ConstMatch k1 k2 : k1 = k2 -> prefix_match (Const k1) (Const k2)
+| VarMatch x1 x2 : x1 = x2 -> prefix_match (Var x1) (Var x2)
+| AbsMatch s1 s2 : prefix_match s1 s2 -> prefix_match (Abs s1) (Abs s2)
+| AppMatch s1 t1 s2 t2 : prefix_match s1 s2 -> prefix_match t1 t2 -> prefix_match (App s1 t1) (App s2 t2)
+| LetMatch s1 t1 s2 t2 : prefix_match s1 s2 -> prefix_match t1 t2 -> prefix_match (Let s1 t1) (Let s2 t2)
+| LabelMatch s1 l1 s2 l2 : l1 = l2 -> prefix_match s1 s2 -> prefix_match (Label s1 l1) (Label s2 l2).
 
 Lemma term_match (p1 p2 : prefix) :
   is_term p1 -> prefix_match p1 p2 -> p1 = p2.
 Proof.
-  revert p2. induction p1 ; intros ; destruct p2 ; simpl in * ; try contradiction ; subst ; auto.
-  - rewrite (IHp1 s0) ; auto.
-  - destruct H, H0. rewrite (IHp1_1 p2_1), (IHp1_2 p2_2) ; auto.
-  - destruct H, H0. rewrite (IHp0 t0), (IHp1 p2) ; auto.
-  - destruct H0. subst. rewrite (IHp1 p2) ; auto.
+  intros. induction H0.
+  - simpl in H. contradiction.
+  - now subst.
+  - now subst.
+  - simpl in H. now rewrite IHprefix_match.
+  - simpl in H. destruct H. now rewrite IHprefix_match1, IHprefix_match2.
+  - simpl in H. destruct H. now rewrite IHprefix_match1, IHprefix_match2.
+  - simpl in H. now rewrite IHprefix_match, H0.
 Qed.
 
 Lemma prefix_monotonicity (e e' f : prefix) :
