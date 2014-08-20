@@ -106,9 +106,12 @@ Admitted.
 Lemma prefix_monotonicity (e e' f : prefix) :
   prefix_match e e' -> is_term f -> star e f -> star e' f.
 Proof.
-  intros. induction H1 as [e|e].
+  intros. revert e' H. induction H1 as [e|e x f].
   - intros. rewrite (term_match e e') ; try constructor ; assumption.
-Admitted.
+  - intros. destruct (match_step e e' x) as [x' [H3 H4]] ; try assumption. assert (star x' f).
+    { apply IHstar ; assumption. }
+    apply (StarC e' x' f) ; assumption.
+Qed.
 
 End SourceCalculus.
 
