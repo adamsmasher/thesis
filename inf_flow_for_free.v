@@ -49,10 +49,12 @@ Inductive step : prefix -> prefix -> Prop :=
 | Step_context (s1 s2 : prefix) (E : eval_ctx) :
    is_context E -> step s1 s2 ->
    step (E s1) (E s2).
+Notation "s → t" := (step s t) (at level 70).
 
 Inductive star : prefix -> prefix -> Prop :=
 | StarR p : star p p
-| StarC x y z : step x y -> star y z -> star x z.
+| StarC x y z : x → y -> star y z -> star x z.
+Notation "s →* t" := (star s t) (at level 70).
 
 Inductive prefix_match : prefix -> prefix -> Prop :=
 | HoleMatch p : prefix_match Hole p
@@ -62,9 +64,10 @@ Inductive prefix_match : prefix -> prefix -> Prop :=
 | AppMatch s1 t1 s2 t2 : prefix_match s1 s2 -> prefix_match t1 t2 -> prefix_match (App s1 t1) (App s2 t2)
 | LetMatch s1 t1 s2 t2 : prefix_match s1 s2 -> prefix_match t1 t2 -> prefix_match (Let s1 t1) (Let s2 t2)
 | LabelMatch s1 l1 s2 l2 : l1 = l2 -> prefix_match s1 s2 -> prefix_match (Label s1 l1) (Label s2 l2).
+Notation "s ⪯ t" := (prefix_match s t) (at level 70).
 
 Lemma term_match (p1 p2 : prefix) :
-  is_term p1 -> prefix_match p1 p2 -> p1 = p2.
+  is_term p1 -> p1 ⪯ p2 -> p1 = p2.
 Proof.
   intros. induction H0.
   - simpl in H. contradiction.
@@ -77,7 +80,7 @@ Proof.
 Qed.
 
 Lemma match_subst s s' t t' :
-  prefix_match s s' -> prefix_match t t' -> prefix_match s.[t/] s'.[t'/].
+  s ⪯ s' -> t ⪯ t' -> s.[t/] ⪯ s'.[t'/].
 Proof.
   intros. revert s' H. induction s ; ainv ; asimpl.
   - constructor.
@@ -98,7 +101,7 @@ Proof.
 Admitted.
 
 Lemma match_step (p1 p2 p1': prefix) :
-  prefix_match p1 p2 -> step p1 p1' -> exists p2', step p2 p2' /\ prefix_match p1' p2'.
+  p1 ⪯ p2 -> p1 → p1' -> exists p2', p2 → p2' /\ p1' ⪯ p2'.
 Proof.
   intros. destruct H0.
   - inversion H ; subst. inversion H2 ; subst. exists s0.[t2/]. split.
@@ -113,11 +116,11 @@ Proof.
 Admitted.
 
 Lemma prefix_monotonicity (e e' f : prefix) :
-  prefix_match e e' -> is_term f -> star e f -> star e' f.
+  e ⪯ e' -> is_term f -> e →* f -> e' →* f.
 Proof.
   intros. revert e' H. induction H1 as [e|e x f].
   - intros. rewrite (term_match e e') ; try constructor ; assumption.
-  - intros. destruct (match_step e e' x) as [x' [H3 H4]] ; try assumption. assert (star x' f).
+  - intros. destruct (match_step e e' x) as [x' [H3 H4]] ; try assumption. assert (x' →* f).
     { apply IHstar ; assumption. }
     apply (StarC e' x' f) ; assumption.
 Qed.
