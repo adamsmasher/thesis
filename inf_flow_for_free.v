@@ -79,31 +79,47 @@ Proof.
   - simpl in H. now rewrite IHprefix_match, H0.
 Qed.
 
-Lemma match_subst s s' t t' :
-  s ⪯ s' -> t ⪯ t' -> s.[t/] ⪯ s'.[t'/].
+Lemma match_up sigma sigma' t:
+  sigma t ⪯ sigma' t -> up sigma t ⪯ up sigma' t.
 Proof.
-  intros. revert t t' H0. induction H ; intros.
+  intros. induction t.
+  - asimpl. now constructor.
+  - asimpl. admit.
+Admitted.
+
+Lemma match_subst s s' sigma sigma' :
+  s ⪯ s' -> (forall t, sigma  t ⪯ sigma' t) -> s.[sigma] ⪯ s'.[sigma'].
+Proof.
+  intros. revert sigma sigma' H0. induction H ; intros.
   - constructor.
   - now constructor.
-  - destruct x2 ; subst.
-    + asimpl. assumption.
-    + asimpl. now constructor.
-  - asimpl. constructor. admit.
+  - destruct x2 ; subst ; asimpl ; apply H0.
+  - asimpl. constructor. apply IHprefix_match. intros. apply match_up. apply H0.
   - constructor ; auto.
-  - constructor ; auto. admit.
+  - constructor ; auto. apply IHprefix_match2. intros t. apply match_up. apply H1.
   - constructor ; auto.
-Admitted.
+Qed.
+
+Lemma match_subst' s s' t t' :
+  s ⪯ s' -> t ⪯ t' -> s.[t/] ⪯ s'.[t'/].
+Proof.
+  intros. apply match_subst.
+  - exact H.
+  - intros e. induction e.
+    + auto.
+    + simpl. now constructor.
+Qed.
 
 Lemma match_step (p1 p2 p1': prefix) :
   p1 ⪯ p2 -> p1 → p1' -> exists p2', p2 → p2' /\ p1' ⪯ p2'.
 Proof.
-  intros. destruct H0.
+  intros. induction H0.
   - inversion H ; subst. inversion H2 ; subst. exists s0.[t2/]. split.
     + constructor.
-    + apply match_subst ; assumption.
+    + apply match_subst' ; assumption.
   - inversion H ; subst. exists t2.[s2/]. split.
     + constructor.
-    + apply match_subst ; assumption.
+    + apply match_subst' ; assumption.
   - inversion H ; subst. inversion H2 ; subst. exists (Label (App s0 t2) l2). split ; constructor ; auto.
     constructor ; assumption.
   -
