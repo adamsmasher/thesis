@@ -82,22 +82,16 @@ Qed.
 Lemma match_subst s s' t t' :
   s ⪯ s' -> t ⪯ t' -> s.[t/] ⪯ s'.[t'/].
 Proof.
-  intros. revert s' H. induction s ; ainv ; asimpl.
+  intros. revert t t' H0. induction H ; intros.
   - constructor.
   - now constructor.
-  - destruct x2 ; simpl.
-    + exact H0.
-    + now constructor.
-  - constructor. admit.
-  - constructor.
-    + apply IHs1. exact H3.
-    + apply IHs2. exact H5.
-  - constructor.
-    + apply IHs. exact H3.
-    + admit.
-  - constructor.
-    + reflexivity.
-    + apply IHs. exact H5.
+  - destruct x2 ; subst.
+    + asimpl. assumption.
+    + asimpl. now constructor.
+  - asimpl. constructor. admit.
+  - constructor ; auto.
+  - constructor ; auto. admit.
+  - constructor ; auto.
 Admitted.
 
 Lemma match_step (p1 p2 p1': prefix) :
