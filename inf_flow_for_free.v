@@ -85,10 +85,10 @@ Proof.
   - simpl in H. now rewrite IHprefix_match, H0.
 Qed.
 
-Lemma subst_match sigma sigma' (t : var) tau :
-  sigma t ⪯ sigma' t -> (sigma t).[tau] ⪯ (sigma' t).[tau].
+Lemma subst_match e e' sigma :
+  e ⪯ e' -> e.[sigma] ⪯ e'.[sigma].
 Proof.
-  intros. revert tau. induction H ; try now constructor.
+  intros. revert sigma. induction H ; try now constructor.
   intros. subst. apply match_refl.
 Qed.
 
@@ -100,7 +100,7 @@ Proof.
   - asimpl. apply subst_match. apply H.
 Qed.
 
-Lemma match_subst s s' sigma sigma' :
+Lemma subst_match2 s s' sigma sigma' :
   s ⪯ s' -> (forall t, sigma  t ⪯ sigma' t) -> s.[sigma] ⪯ s'.[sigma'].
 Proof.
   intros. revert sigma sigma' H0. induction H ; intros.
@@ -113,10 +113,10 @@ Proof.
   - constructor ; auto.
 Qed.
 
-Lemma match_subst' s s' t t' :
+Lemma subst_match2' s s' t t' :
   s ⪯ s' -> t ⪯ t' -> s.[t/] ⪯ s'.[t'/].
 Proof.
-  intros. apply match_subst.
+  intros. apply subst_match2.
   - exact H.
   - intros e. induction e.
     + auto.
@@ -129,10 +129,10 @@ Proof.
   intros. induction H0.
   - inversion H ; subst. inversion H2 ; subst. exists s0.[t2/]. split.
     + constructor.
-    + apply match_subst' ; assumption.
+    + apply subst_match2' ; assumption.
   - inversion H ; subst. exists t2.[s2/]. split.
     + constructor.
-    + apply match_subst' ; assumption.
+    + apply subst_match2' ; assumption.
   - inversion H ; subst. inversion H2 ; subst. exists (Label (App s0 t2) l2). split ; constructor ; auto.
     constructor ; assumption.
   -
