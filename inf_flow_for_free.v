@@ -72,6 +72,19 @@ Proof.
   induction e ; now constructor.
 Qed.
 
+Lemma match_trans (e1 e2 e3 : prefix) :
+  e1 ⪯ e2 -> e2 ⪯ e3 -> e1 ⪯ e3.
+Proof.
+  intros. revert e3 H0. induction H ; intros.
+  - constructor.
+  - now subst.
+  - now subst.
+  - inversion H0 ; subst. constructor. apply IHprefix_match. exact H2.
+  - inversion H1; subst. constructor ; auto.
+  - inversion H1 ; subst. constructor ; auto.
+  - inversion H1 ; subst. constructor ; auto.
+Qed.
+
 Lemma term_match (p1 p2 : prefix) :
   is_term p1 -> p1 ⪯ p2 -> p1 = p2.
 Proof.
