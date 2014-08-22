@@ -66,6 +66,12 @@ Inductive prefix_match : prefix -> prefix -> Prop :=
 | LabelMatch s1 l1 s2 l2 : l1 = l2 -> prefix_match s1 s2 -> prefix_match (Label s1 l1) (Label s2 l2).
 Notation "s ⪯ t" := (prefix_match s t) (at level 70).
 
+Lemma match_refl (e : prefix) :
+  e ⪯ e.
+Proof.
+  induction e ; now constructor.
+Qed.
+
 Lemma term_match (p1 p2 : prefix) :
   is_term p1 -> p1 ⪯ p2 -> p1 = p2.
 Proof.
@@ -79,13 +85,20 @@ Proof.
   - simpl in H. now rewrite IHprefix_match, H0.
 Qed.
 
-Lemma match_up sigma sigma' t:
-  sigma t ⪯ sigma' t -> up sigma t ⪯ up sigma' t.
+Lemma subst_match sigma sigma' (t : var) tau :
+  sigma t ⪯ sigma' t -> (sigma t).[tau] ⪯ (sigma' t).[tau].
+Proof.
+  intros. revert tau. induction H ; try now constructor.
+  intros. subst. apply match_refl.
+Qed.
+
+Lemma match_up sigma sigma':
+  (forall t, sigma t ⪯ sigma' t) -> (forall t, up sigma t ⪯ up sigma' t).
 Proof.
   intros. induction t.
   - asimpl. now constructor.
-  - asimpl. admit.
-Admitted.
+  - asimpl. apply subst_match. apply H.
+Qed.
 
 Lemma match_subst s s' sigma sigma' :
   s ⪯ s' -> (forall t, sigma  t ⪯ sigma' t) -> s.[sigma] ⪯ s'.[sigma'].
