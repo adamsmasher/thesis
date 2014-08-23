@@ -39,6 +39,17 @@ end.
 Definition eval_ctx := prefix -> prefix.
 Parameter is_context : eval_ctx -> Prop.
 
+Inductive contains : prefix -> prefix -> Prop :=
+| ContainsId e : contains e e
+| ContainsAbs s t : contains s t -> contains (Abs s) t
+| ContainsAppL s t u : contains s u -> contains (App s t) u
+| ContainsAppR s t u : contains t u -> contains (App s t) u
+| ContainsLetL s t u : contains s u -> contains (Let s t) u
+| ContainsLetR s t u : contains t u -> contains (Let s t) u
+| ContainsLabel s t l : contains s t -> contains (Label s l) t.
+
+Parameter ctx_subst : forall E, is_context E -> forall e, contains (E e) e.
+
 Inductive step : prefix -> prefix -> Prop :=
 | Step_beta (s t : prefix) :
    step (App (Abs s) t) s.[t/]
