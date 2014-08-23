@@ -80,7 +80,7 @@ Proof.
   - now subst.
   - now subst.
   - inversion H0 ; subst. constructor. apply IHprefix_match. exact H2.
-  - inversion H1; subst. constructor ; auto.
+  - inversion H1 ; subst. constructor ; auto.
   - inversion H1 ; subst. constructor ; auto.
   - inversion H1 ; subst. constructor ; auto.
 Qed.
