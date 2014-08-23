@@ -36,19 +36,31 @@ end.
 
 (* notion of contexts taken from Proving ML Type Soundness Within Coq by Catherine Dubois *)
 (* for now our contexts are abstract *)
+(* wait no scratch that that notion of contexts is insufficient *)
+
+Fixpoint prefix_length p := match p with
+| Hole => 1
+| Const _ => 1
+| Var _ => 1
+| Abs s => S (prefix_length s)
+| App s t => S (prefix_length s + prefix_length t)
+| Let s t => S (prefix_length s + prefix_length t)
+| Label s _ => S (prefix_length s)
+end.
+
+Inductive prefix_at : prefix -> prefix -> nat -> Prop :=
+| AtId p : prefix_at p p 0
+| AtAbs s t n : prefix_at s t n -> prefix_at (Abs s) t (S n)
+| AtAppL s t u n : prefix_at s u n -> prefix_at (App s t) u (S n)
+| AtAppR s t u m n : prefix_at t u n -> m = S (n + prefix_length s) -> prefix_at (App s t) u m
+| AtLetL s t u n : prefix_at s u n -> prefix_at (Let s t) u (S n)
+| AtLetR s t u m n : prefix_at t u n -> m = S (n + prefix_length s) ->  prefix_at (Let s t) u m
+| AtLabel s l t n : prefix_at s t n -> prefix_at (Label s l) t (S n).
+
 Definition eval_ctx := prefix -> prefix.
 Parameter is_context : eval_ctx -> Prop.
 
-Inductive contains : prefix -> prefix -> Prop :=
-| ContainsId e : contains e e
-| ContainsAbs s t : contains s t -> contains (Abs s) t
-| ContainsAppL s t u : contains s u -> contains (App s t) u
-| ContainsAppR s t u : contains t u -> contains (App s t) u
-| ContainsLetL s t u : contains s u -> contains (Let s t) u
-| ContainsLetR s t u : contains t u -> contains (Let s t) u
-| ContainsLabel s t l : contains s t -> contains (Label s l) t.
-
-Parameter ctx_subst : forall E, is_context E -> forall e, contains (E e) e.
+Parameter ctx_subst : forall E, is_context E -> exists n, forall s, prefix_at (E s) s n.
 
 Inductive step : prefix -> prefix -> Prop :=
 | Step_beta (s t : prefix) :
