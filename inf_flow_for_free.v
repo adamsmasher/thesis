@@ -34,33 +34,36 @@ Fixpoint is_term (p : prefix) : Prop := match p with
 | Label s _ => is_term s
 end.
 
+Inductive pointer : Type :=
+| Here
+| AbsSub (p' : pointer)
+| AppL (p' : pointer)
+| AppR (p' : pointer)
+| LetL (p' : pointer)
+| LetR (p' : pointer)
+| LabelSub (p' : pointer).
+
+Fixpoint prefix_at (p : pointer) (e : prefix) : option prefix := match p, e with
+| Here, _ => Some e
+| AbsSub p', Abs e' => prefix_at p' e'
+| AppL p', App s _ => prefix_at p' s
+| AppR p', App _ t => prefix_at p' t
+| LetL p', Let s _ => prefix_at p' s
+| LetR p', Let _ t => prefix_at p' t
+| LabelSub p', Label e' _ => prefix_at p' e'
+| _, _ => None
+end.
+
 (* notion of contexts taken from Proving ML Type Soundness Within Coq by Catherine Dubois *)
 (* for now our contexts are abstract *)
 (* wait no scratch that that notion of contexts is insufficient *)
 
-Fixpoint prefix_length p := match p with
-| Hole => 1
-| Const _ => 1
-| Var _ => 1
-| Abs s => S (prefix_length s)
-| App s t => S (prefix_length s + prefix_length t)
-| Let s t => S (prefix_length s + prefix_length t)
-| Label s _ => S (prefix_length s)
-end.
-
-Inductive prefix_at : prefix -> prefix -> nat -> Prop :=
-| AtId p : prefix_at p p 0
-| AtAbs s t n : prefix_at s t n -> prefix_at (Abs s) t (S n)
-| AtAppL s t u n : prefix_at s u n -> prefix_at (App s t) u (S n)
-| AtAppR s t u m n : prefix_at t u n -> m = S (n + prefix_length s) -> prefix_at (App s t) u m
-| AtLetL s t u n : prefix_at s u n -> prefix_at (Let s t) u (S n)
-| AtLetR s t u m n : prefix_at t u n -> m = S (n + prefix_length s) ->  prefix_at (Let s t) u m
-| AtLabel s l t n : prefix_at s t n -> prefix_at (Label s l) t (S n).
-
 Definition eval_ctx := prefix -> prefix.
 Parameter is_context : eval_ctx -> Prop.
 
-Parameter ctx_subst : forall E, is_context E -> exists n, forall s, prefix_at (E s) s n.
+(* this isn't quite right *)
+Parameter ctx_subst : forall E, is_context E -> exists p,
+  (forall s, prefix_at p (E s) = Some s) /\ (forall p' s s', p <> p' -> prefix_at p' (E s) = prefix_at p' (E s')).
 
 Inductive step : prefix -> prefix -> Prop :=
 | Step_beta (s t : prefix) :
