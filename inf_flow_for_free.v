@@ -34,36 +34,10 @@ Fixpoint is_term (p : prefix) : Prop := match p with
 | Label s _ => is_term s
 end.
 
-Inductive pointer : Type :=
-| Here
-| AbsSub (p' : pointer)
-| AppL (p' : pointer)
-| AppR (p' : pointer)
-| LetL (p' : pointer)
-| LetR (p' : pointer)
-| LabelSub (p' : pointer).
-
-Fixpoint prefix_at (p : pointer) (e : prefix) : option prefix := match p, e with
-| Here, _ => Some e
-| AbsSub p', Abs e' => prefix_at p' e'
-| AppL p', App s _ => prefix_at p' s
-| AppR p', App _ t => prefix_at p' t
-| LetL p', Let s _ => prefix_at p' s
-| LetR p', Let _ t => prefix_at p' t
-| LabelSub p', Label e' _ => prefix_at p' e'
-| _, _ => None
-end.
-
-(* notion of contexts taken from Proving ML Type Soundness Within Coq by Catherine Dubois *)
-(* for now our contexts are abstract *)
-(* wait no scratch that that notion of contexts is insufficient *)
-
-Definition eval_ctx := prefix -> prefix.
-Parameter is_context : eval_ctx -> Prop.
-
-(* this isn't quite right *)
-Parameter ctx_subst : forall E, is_context E -> exists p,
-  (forall s, prefix_at p (E s) = Some s) /\ (forall p' s s', p <> p' -> prefix_at p' (E s) = prefix_at p' (E s')).
+(*
+Rather than use contexts that abstract over e.g. call-by-name and call-by value,
+we extend the evaluation relation for call-by-name
+*)
 
 Inductive step : prefix -> prefix -> Prop :=
 | Step_beta (s t : prefix) :
@@ -72,9 +46,10 @@ Inductive step : prefix -> prefix -> Prop :=
    step (Let s t) t.[s/]
 | Step_lift (s t : prefix) (l : label) :
    step (App (Label s l) t) (Label (App s t) l)
-| Step_context (s1 s2 : prefix) (E : eval_ctx) :
-   is_context E -> step s1 s2 ->
-   step (E s1) (E s2).
+| Step_app s s' t :
+   step s s' -> step (App s t) (App s' t)
+| Step_label (s s' : prefix) (l : label) :
+   step s s' -> step (Label s l) (Label s' l).
 Notation "s → t" := (step s t) (at level 70).
 
 Inductive star : prefix -> prefix -> Prop :=
@@ -165,7 +140,7 @@ Qed.
 Lemma match_step (p1 p2 p1': prefix) :
   p1 ⪯ p2 -> p1 → p1' -> exists p2', p2 → p2' /\ p1' ⪯ p2'.
 Proof.
-  intros. induction H0.
+  intros. revert p2 H. induction H0 ; intros.
   - inversion H ; subst. inversion H2 ; subst. exists s0.[t2/]. split.
     + constructor.
     + apply subst_match2' ; assumption.
@@ -174,16 +149,16 @@ Proof.
     + apply subst_match2' ; assumption.
   - inversion H ; subst. inversion H2 ; subst. exists (Label (App s0 t2) l2). split ; constructor ; auto.
     constructor ; assumption.
-  -
-Admitted.
+  - inversion H ; subst. destruct ((IHstep s2) H3) as [x [H1 H2]]. exists (App x t2). split ; now constructor.
+  - inversion H ; subst.  destruct ((IHstep s2) H5) as [x [H1 H2]]. exists (Label x l2). split ; now constructor.
+Qed.
 
 Lemma prefix_monotonicity (e e' f : prefix) :
   e ⪯ e' -> is_term f -> e →* f -> e' →* f.
 Proof.
   intros. revert e' H. induction H1 as [e|e x f].
   - intros. rewrite (term_match e e') ; try constructor ; assumption.
-  - intros. destruct (match_step e e' x) as [x' [H3 H4]] ; try assumption. assert (x' →* f).
-    { apply IHstar ; assumption. }
+  - intros. destruct (match_step e e' x) as [x' [H3 H4]] ; try assumption. assert (x' →* f) by auto.
     apply (StarC e' x' f) ; assumption.
 Qed.
 
