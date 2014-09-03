@@ -109,9 +109,9 @@ Qed.
 Lemma match_up sigma sigma':
   (forall t, sigma t ⪯ sigma' t) -> (forall t, up sigma t ⪯ up sigma' t).
 Proof.
-  intros. induction t.
-  - asimpl. now constructor.
-  - asimpl. apply subst_match. apply H.
+  intros. induction t ; asimpl.
+  - now constructor.
+  - apply subst_match. apply H.
 Qed.
 
 Lemma subst_match2 s s' sigma sigma' :
@@ -140,25 +140,25 @@ Qed.
 Lemma match_step (p1 p2 p1': prefix) :
   p1 ⪯ p2 -> p1 → p1' -> exists p2', p2 → p2' /\ p1' ⪯ p2'.
 Proof.
-  intros. revert p2 H. induction H0 ; intros.
-  - inversion H ; subst. inversion H2 ; subst. exists s0.[t2/]. split.
+  intros. revert p2 H. induction H0 ; intros ; inversion H ; subst.
+  - inversion H2 ; subst. exists s0.[t2/]. split.
     + constructor.
     + apply subst_match2' ; assumption.
-  - inversion H ; subst. exists t2.[s2/]. split.
+  - exists t2.[s2/]. split.
     + constructor.
     + apply subst_match2' ; assumption.
-  - inversion H ; subst. inversion H2 ; subst. exists (Label (App s0 t2) l2). split ; constructor ; auto.
+  - inversion H2 ; subst. exists (Label (App s0 t2) l2). split ; constructor ; auto.
     constructor ; assumption.
-  - inversion H ; subst. destruct ((IHstep s2) H3) as [x [H1 H2]]. exists (App x t2). split ; now constructor.
-  - inversion H ; subst.  destruct ((IHstep s2) H5) as [x [H1 H2]]. exists (Label x l2). split ; now constructor.
+  - destruct ((IHstep s2) H3) as [x [H1 H2]]. exists (App x t2). split ; now constructor.
+  - destruct ((IHstep s2) H5) as [x [H1 H2]]. exists (Label x l2). split ; now constructor.
 Qed.
 
 Lemma prefix_monotonicity (e e' f : prefix) :
   e ⪯ e' -> is_term f -> e →* f -> e' →* f.
 Proof.
-  intros. revert e' H. induction H1 as [e|e x f].
-  - intros. rewrite (term_match e e') ; try constructor ; assumption.
-  - intros. destruct (match_step e e' x) as [x' [H3 H4]] ; try assumption. assert (x' →* f) by auto.
+  intros. revert e' H. induction H1 as [e|e x f] ; intros.
+  - rewrite (term_match e e') ; try constructor ; assumption.
+  - destruct (match_step e e' x) as [x' [H3 H4]] ; try assumption. assert (x' →* f) by auto.
     apply (StarC e' x' f) ; assumption.
 Qed.
 
