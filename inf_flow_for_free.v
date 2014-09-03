@@ -187,6 +187,55 @@ Proof.
     apply (StarC e' x' f) ; assumption.
 Qed.
 
+Definition label_filter (p : label -> bool) :=
+  fix f (e : prefix) := match e with
+  | Label e l => if p l then Label (f e) l else Hole
+  | Hole => Hole
+  | Const k => Const k
+  | Var x => Var x
+  | Abs e => Abs (f e)
+  | App e1 e2 => App (f e1) (f e2)
+  | Let e1 e2 => Let (f e1) (f e2)
+  end. 
+
+Lemma filter_subst p e1 e2 :
+  (label_filter p e1).[label_filter p e2/] = label_filter p e1.[e2/].
+Proof.
+  revert e2. induction e1 ; intros ; try autosubst.
+  - admit.
+  - asimpl. now rewrite IHe1_1, IHe1_2.
+  - admit.
+  - asimpl. destruct (p l).
+    + simpl. now rewrite IHe1.
+    + auto.
+Admitted.
+
+Lemma filter_beta p e1 e2 :
+  label_filter p (App (Abs e1) e2) → label_filter p e1.[e2/].
+Proof.
+  rewrite <- filter_subst. constructor.
+Qed.
+
+Lemma filter_let p e1 e2 :
+  label_filter p (Let e1 e2) → label_filter p e2.[e1/].
+Proof.
+  rewrite <- filter_subst. constructor.
+Qed.
+
+Lemma filter_label p e1 e2 l :
+  p l = true -> label_filter p (App (Label e1 l) e2) →label_filter p (Label (App e1 e2) l).
+Proof.
+  intros. simpl. rewrite H. constructor.
+Qed.
+
+Theorem stability e f p :
+  is_term f -> e →* f -> label_filter p f = f -> label_filter p e →* f.
+Proof.
+  intros. induction H0.
+  - rewrite H1. constructor.
+  - admit.
+Admitted.
+
 End SourceCalculus.
 
 (* lattice stuff influenced by A reflection-based
