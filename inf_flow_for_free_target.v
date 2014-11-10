@@ -43,6 +43,4 @@ Inductive step : term -> term -> Prop :=
 
 Notation "s → t" := (step s t) (at level 70).
 
-
-
 End TargetCalculus.
