@@ -132,9 +132,7 @@ Lemma subst_match2' s s' t t' :
 Proof.
   intros. apply subst_match2.
   - exact H.
-  - intros e. induction e.
-    + auto.
-    + simpl. now constructor.
+  - intros e. destruct e ; asimpl ; auto using prefix_match.
 Qed.
 
 Lemma match_step (p1 p2 p1': prefix) :
