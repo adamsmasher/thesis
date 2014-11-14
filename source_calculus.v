@@ -172,28 +172,37 @@ Definition label_filter (p : label -> bool) :=
   end. 
 Notation "⌊ e ⌋ p" := (label_filter p e) (at level 70).
 
-Lemma filter_subst p e1 e2 :
-  (label_filter p e1).[label_filter p e2/] = label_filter p e1.[e2/].
+Lemma ren_filter (sigma : var -> prefix) xi p : (sigma >>> label_filter p) >>> subst (xi >>> ids) = (sigma >>> subst (xi >>> ids)) >>> label_filter p.
 Proof.
-  revert e2. induction e1 ; intros ; try autosubst.
+  f_ext. intros. simpl. generalize (sigma x). intros s. revert xi. induction s; intros; asimpl; try f_equal; eauto.
+  destruct (p l); asimpl; try f_equal; eauto.
+Qed.
+
+Hint Rewrite @ren_filter : autosubst.
+
+Lemma filter_subst p e sigma:
+  (⌊ e ⌋p).[sigma >>> label_filter p] = ⌊ e.[sigma] ⌋p.
+Proof.
+  revert sigma. induction e ; intros.
+  - simpl. reflexivity.
+  - simpl. reflexivity.
+  - simpl. reflexivity.
+  - asimpl.  autosubst_unfold. rewrite ren_filter. asimpl.  f_equal. admit.
   - admit.
-  - asimpl. now rewrite IHe1_1, IHe1_2.
   - admit.
-  - asimpl. destruct (p l).
-    + simpl. now rewrite IHe1.
-    + auto.
+  - admit.
 Admitted.
 
 Lemma filter_beta p e1 e2 :
   ⌊ App (Abs e1) e2 ⌋p → ⌊ e1.[e2/] ⌋p.
 Proof.
-  rewrite <- filter_subst. constructor.
+  rewrite <- filter_subst. asimpl. constructor.
 Qed.
 
 Lemma filter_let p e1 e2 :
   ⌊ Let e1 e2 ⌋p → ⌊ e2.[e1/] ⌋p.
 Proof.
-  rewrite <- filter_subst. constructor.
+  rewrite <- filter_subst. asimpl. constructor.
 Qed.
 
 Lemma filter_lift p e1 e2 l :
