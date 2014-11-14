@@ -211,12 +211,41 @@ Proof.
   intros. simpl. rewrite H. constructor.
 Qed.
 
+Lemma filter_step {s s'} :
+  s → s' -> forall p, (⌊ s ⌋p → ⌊ s' ⌋p) \/ ⌊ s' ⌋p ⪯ ⌊ s ⌋p.
+Proof.
+  intros. induction H.
+  - left. apply filter_beta.
+  - left. apply filter_let.
+  - case_eq (p l) ; intros.
+    + left. now apply filter_lift.
+    + simpl. rewrite H. right. constructor.
+  - destruct IHstep.
+    + left. now constructor.
+    + right. simpl. constructor. apply H0. apply match_refl.
+  - destruct IHstep.
+    + simpl. destruct (p l). left. constructor. apply H0. right. constructor.
+    + right. simpl. destruct (p l) ; now constructor.
+Qed.
+
+Lemma hole_step f :
+  Hole →* f -> f = Hole.
+Proof.
+  intros H. inversion H.
+  - reflexivity.
+  - inversion H0.
+Qed.
+
+Inductive box T := Box (H : T).
+
 Theorem stability e f p :
   is_term f -> e →* f -> ⌊ f ⌋p = f -> ⌊ e ⌋p →* f.
 Proof.
   intros. induction H0.
   - rewrite H1. constructor.
-  - admit.
-Admitted.
+  - destruct (filter_step H0 p).
+    + econstructor ; eauto.
+    + eapply prefix_monotonicity ; eauto.
+Qed.
 
 End SourceCalculus.
