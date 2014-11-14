@@ -170,6 +170,7 @@ Definition label_filter (p : label -> bool) :=
   | App e1 e2 => App (f e1) (f e2)
   | Let e1 e2 => Let (f e1) (f e2)
   end. 
+Notation "⌊ e ⌋ p" := (label_filter p e) (at level 70).
 
 Lemma filter_subst p e1 e2 :
   (label_filter p e1).[label_filter p e2/] = label_filter p e1.[e2/].
@@ -184,25 +185,25 @@ Proof.
 Admitted.
 
 Lemma filter_beta p e1 e2 :
-  label_filter p (App (Abs e1) e2) → label_filter p e1.[e2/].
+  ⌊ App (Abs e1) e2 ⌋p → ⌊ e1.[e2/] ⌋p.
 Proof.
   rewrite <- filter_subst. constructor.
 Qed.
 
 Lemma filter_let p e1 e2 :
-  label_filter p (Let e1 e2) → label_filter p e2.[e1/].
+  ⌊ Let e1 e2 ⌋p → ⌊ e2.[e1/] ⌋p.
 Proof.
   rewrite <- filter_subst. constructor.
 Qed.
 
-Lemma filter_label p e1 e2 l :
-  p l = true -> label_filter p (App (Label e1 l) e2) →label_filter p (Label (App e1 e2) l).
+Lemma filter_lift p e1 e2 l :
+  p l = true -> ⌊ App (Label e1 l) e2 ⌋p → ⌊ Label (App e1 e2) l ⌋p.
 Proof.
   intros. simpl. rewrite H. constructor.
 Qed.
 
 Theorem stability e f p :
-  is_term f -> e →* f -> label_filter p f = f -> label_filter p e →* f.
+  is_term f -> e →* f -> ⌊ f ⌋p = f -> ⌊ e ⌋p →* f.
 Proof.
   intros. induction H0.
   - rewrite H1. constructor.
