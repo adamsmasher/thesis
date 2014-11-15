@@ -188,9 +188,11 @@ Proof.
   - simpl. reflexivity.
   - simpl. reflexivity.
   - asimpl.  autosubst_unfold. rewrite ren_filter. asimpl.  f_equal. admit.
+  - simpl. now rewrite IHe1, IHe2.
   - admit.
-  - admit.
-  - admit.
+  - simpl. destruct (p l).
+    + simpl. now rewrite IHe.
+    + simpl. reflexivity.
 Admitted.
 
 Lemma filter_beta p e1 e2 :
