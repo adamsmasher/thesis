@@ -24,15 +24,13 @@ Instance Rename_prefix : Rename prefix. derive. Defined.
 Instance Subst_prefix : Subst prefix. derive. Defined.
 Instance SubstLemmas_prefix : SubstLemmas prefix. derive. Defined.
 
-Fixpoint is_term (p : prefix) : Prop := match p with
-| Hole => False
-| Const _ => True
-| Var _ => True
-| Abs s => is_term s
-| App s t => is_term s /\ is_term t
-| Let s t => is_term s /\ is_term t
-| Label s _ => is_term s
-end.
+Inductive is_term : prefix -> Prop :=
+| ConstTerm k : is_term (Const k)
+| VarTerm x : is_term (Var x)
+| AbsTerm s : is_term s -> is_term (Abs s)
+| AppTerm s t : is_term s -> is_term t -> is_term (App s t)
+| LetTerm s t : is_term s -> is_term t -> is_term (Let s t)
+| LabelTerm s l : is_term s -> is_term (Label s l).
 
 (*
 Rather than use contexts that abstract over e.g. call-by-name and call-by value,
@@ -90,13 +88,13 @@ Lemma term_match (p1 p2 : prefix) :
   is_term p1 -> p1 ⪯ p2 -> p1 = p2.
 Proof.
   intros. induction H0.
-  - simpl in H. contradiction.
+  - simpl in H. inversion H.
   - now subst.
   - now subst.
-  - simpl in H. now rewrite IHprefix_match.
-  - simpl in H. destruct H. now rewrite IHprefix_match1, IHprefix_match2.
-  - simpl in H. destruct H. now rewrite IHprefix_match1, IHprefix_match2.
-  - simpl in H. now rewrite IHprefix_match, H0.
+  - simpl in H. inversion H. now rewrite IHprefix_match.
+  - simpl in H. inversion H. now rewrite IHprefix_match1, IHprefix_match2.
+  - simpl in H. inversion H. now rewrite IHprefix_match1, IHprefix_match2.
+  - simpl in H. inversion H. now rewrite IHprefix_match, H0.
 Qed.
 
 Lemma subst_match e e' sigma :
