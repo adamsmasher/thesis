@@ -3,7 +3,7 @@ Require Import Autosubst.
 Section TargetCalculus.
 
 Parameter label : Set.
-
+Parameter bottom : label.
 Parameter join : label -> label -> label.
 
 Notation "l ⋎ m" := (join l m) (at level 70).
