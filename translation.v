@@ -17,7 +17,7 @@ Notation "l @ m" := (App (App Join l) m) (at level 70).
 
 Definition translation (e : source_calculus.prefix) (H : is_term e) : prod target_calculus.term target_calculus.term.
   induction e.
-  - inversion H.
+  - exfalso. inversion H.
   - split.
     + exact (Const k).
     + exact (Label bottom).
@@ -25,15 +25,17 @@ Definition translation (e : source_calculus.prefix) (H : is_term e) : prod targe
     + exact (App Fst (Var x)).
     + exact (App Snd (Var x)).
   - split.
-    + inversion H ; subst. exact (Abs (reify_pair (IHe X))).
+    + assert (H' : is_term s) by now inversion H. exact (Abs (reify_pair (IHe H'))).
     + exact (Label bottom).
-  - inversion H ; subst. destruct (IHe1 X) as [e1_1 e1_2]. pose (e2' := (reify_pair (IHe2 X0))). split.
+  - assert (H1 : is_term e1) by now inversion H. assert (H2 : is_term e2) by now inversion H.
+    destruct (IHe1 H1) as [e1_1 e1_2]. pose (e2' := (reify_pair (IHe2 H2))). split.
     + exact (App Fst (App e1_1 e2')).
     + exact (e1_2 @ (App Snd (App e1_1 e2'))).
-  - inversion H ; subst. destruct (IHe0 X0) as [e2_1 e2_2]. pose (e1' := (reify_pair (IHe X))). split.
+  - assert (He : is_term e) by now inversion H. assert (Ht : is_term t) by now inversion H.
+    destruct (IHe0 Ht) as [e2_1 e2_2]. pose (e1' := (reify_pair (IHe He))). split.
     + exact (Let e1' e2_1).
     + exact (Let e1' e2_2).
-  - inversion H ; subst. destruct (IHe X) as [e_1 e_2]. split.
+  - assert (He : is_term e) by now inversion H. destruct (IHe He) as [e_1 e_2]. split.
     + exact e_1.
     + exact ((Label (translate_label l)) @ e_2).
 Defined.
@@ -74,9 +76,9 @@ Lemma simulation (e f : source_calculus.prefix) (He : is_term e) (Hf : is_term f
   e → f  -> *⦇e [He]⦈* →@* *⦇f [Hf]⦈*.
 Proof.
   intros. induction H.
-  - inversion He ; subst. inversion X ; subst. admit.
+  - inversion He ; subst. inversion H1 ; subst. admit.
   - inversion He ; subst. admit.
-  - inversion He ; subst. inversion X ; subst. admit.
+  - inversion He ; subst. inversion H1 ; subst. admit.
   - inversion He ; subst. inversion Hf ; subst. admit.
   - inversion He ; subst. inversion Hf ; subst. admit.
 Admitted.

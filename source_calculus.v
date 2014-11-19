@@ -24,7 +24,7 @@ Instance Rename_prefix : Rename prefix. derive. Defined.
 Instance Subst_prefix : Subst prefix. derive. Defined.
 Instance SubstLemmas_prefix : SubstLemmas prefix. derive. Defined.
 
-Inductive is_term : prefix -> Type :=
+Inductive is_term : prefix -> Prop :=
 | ConstTerm k : is_term (Const k)
 | VarTerm x : is_term (Var x)
 | AbsTerm s : is_term s -> is_term (Abs s)
@@ -87,14 +87,14 @@ Qed.
 Lemma term_match (p1 p2 : prefix) :
   is_term p1 -> p1 ⪯ p2 -> p1 = p2.
 Proof.
-  intros. induction H.
-  - inversion X.
+  intros. induction H0.
+  - inversion H.
   - now subst.
   - now subst.
-  - inversion X. now rewrite IHprefix_match.
-  - inversion X. now rewrite IHprefix_match1, IHprefix_match2.
-  - inversion X. now rewrite IHprefix_match1, IHprefix_match2.
-  - inversion X. subst. now rewrite IHprefix_match.
+  - inversion H. now rewrite IHprefix_match.
+  - inversion H. now rewrite IHprefix_match1, IHprefix_match2.
+  - inversion H. now rewrite IHprefix_match1, IHprefix_match2.
+  - inversion H. subst. now rewrite IHprefix_match.
 Qed.
 
 Lemma subst_match e e' sigma :
@@ -152,7 +152,7 @@ Qed.
 Lemma prefix_monotonicity (e e' f : prefix) :
   e ⪯ e' -> is_term f -> e →* f -> e' →* f.
 Proof.
-  intros. revert e' H. induction H0 as [e|e x f] ; intros.
+  intros. revert e' H. induction H1 as [e|e x f] ; intros.
   - rewrite (term_match e e') ; try constructor ; assumption.
   - destruct (match_step e e' x) as [x' [H3 H4]] ; try assumption. assert (x' →* f) by auto.
     apply (StarC e' x' f) ; assumption.
@@ -241,9 +241,9 @@ Inductive box T := Box (H : T).
 Theorem stability e f p :
   is_term f -> e →* f -> ⌊ f ⌋p = f -> ⌊ e ⌋p →* f.
 Proof.
-  intros. induction H.
-  - rewrite H0. constructor.
-  - destruct (filter_step H p).
+  intros. induction H0.
+  - rewrite H1. constructor.
+  - destruct (filter_step H0 p).
     + econstructor ; eauto.
     + eapply prefix_monotonicity ; eauto.
 Qed.
