@@ -1,6 +1,8 @@
 Require Import source_calculus.
 Require Import target_calculus.
 
+Require Import Autosubst.
+
 Section Translation.
 
 Parameter label_eq : source_calculus.label = target_calculus.label.
