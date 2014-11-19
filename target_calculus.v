@@ -43,4 +43,16 @@ Inductive step : term -> term -> Prop :=
 
 Notation "s → t" := (step s t) (at level 70).
 
+Inductive step_ext : term -> term -> Prop :=
+| Step s t : s → t -> step_ext s t
+| Step_assoc e1 e2 e3 : step_ext ((e1 @ e2) @ e3) (e1 @ (e2 @ e3))
+| Step_neutral e : step_ext (Label bottom) e.
+
+Notation "s →@ t" := (step_ext s t) (at level 70).
+
+Inductive star_ext : term -> term -> Prop :=
+| StarR p : star_ext p p
+| StarC x y z : x →@ y -> star_ext y z -> star_ext x z.
+Notation "s →@* t" := (star_ext s t) (at level 70).
+
 End TargetCalculus.
