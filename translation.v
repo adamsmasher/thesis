@@ -37,12 +37,14 @@ Definition translation (e : source_calculus.prefix) (H : is_term e) : prod targe
     + exact e_1.
     + exact ((Label (translate_label l)) @ e_2).
 Defined.
+Notation "⦇ e [ H ] ⦈" := (translation e H).
+Notation "*⦇ e [ H ] ⦈*" := (reify_pair (translation e H)).
 
 Notation "s → t" := (source_calculus.step s t) (at level 70).
 Notation "s →@* t" := (target_calculus.star_ext s t) (at level 70).
 
 Lemma simulation (e f : source_calculus.prefix) (He : is_term e) (Hf : is_term f) :
-  e → f  -> (reify_pair (translation e He)) →@* (reify_pair (translation f Hf)).
+  e → f  -> *⦇e [He]⦈* →@* *⦇f [Hf]⦈*.
 Proof.
   intros. induction H.
   - inversion He ; subst. inversion X ; subst. admit.
