@@ -25,7 +25,7 @@ Definition translation (e : source_calculus.prefix) (H : is_term e) : prod targe
     + exact (App Fst (Var x)).
     + exact (App Snd (Var x)).
   - split.
-    + inversion H ; subst. exact (reify_pair (IHe X)).
+    + inversion H ; subst. exact (Abs (reify_pair (IHe X))).
     + exact (Label bottom).
   - inversion H ; subst. destruct (IHe1 X) as [e1_1 e1_2]. pose (e2' := (reify_pair (IHe2 X0))). split.
     + exact (App Fst (App e1_1 e2')).
