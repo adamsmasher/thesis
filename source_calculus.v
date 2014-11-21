@@ -170,7 +170,7 @@ Definition label_filter (p : label -> bool) :=
   end. 
 Notation "⌊ e ⌋ p" := (label_filter p e) (at level 70).
 
-Lemma ren_filter (sigma : var -> prefix) xi p : (sigma >>> label_filter p) >>> subst (xi >>> ids) = (sigma >>> subst (xi >>> ids)) >>> label_filter p.
+Lemma ren_filter (sigma : var -> prefix) xi p : sigma >>> (label_filter p >>> subst (xi >>> ids)) = (sigma >>> subst (xi >>> ids)) >>> label_filter p.
 Proof.
   f_ext. intros. simpl. generalize (sigma x). intros s. revert xi. induction s; intros; asimpl; try f_equal; eauto.
   destruct (p l); asimpl; try f_equal; eauto.
@@ -185,13 +185,15 @@ Proof.
   - simpl. reflexivity.
   - simpl. reflexivity.
   - simpl. reflexivity.
-  - asimpl.  autosubst_unfold. rewrite ren_filter. asimpl.  f_equal. admit.
+  - asimpl. rewrite <- IHe. autosubst.
   - simpl. now rewrite IHe1, IHe2.
-  - admit.
+  - asimpl. f_equal.
+    + apply IHe.
+    + rewrite <- IHe0. autosubst.
   - simpl. destruct (p l).
     + simpl. now rewrite IHe.
     + simpl. reflexivity.
-Admitted.
+Qed.
 
 Lemma filter_beta p e1 e2 :
   ⌊ App (Abs e1) e2 ⌋p → ⌊ e1.[e2/] ⌋p.
