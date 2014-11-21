@@ -36,14 +36,9 @@ Notation "s → t" := (source_calculus.step s t) (at level 70).
 Notation "s →@* t" := (target_calculus.star_ext s t) (at level 70).
 
 Lemma simulation (e f : source_calculus.prefix) (He : is_term e) (Hf : is_term f) :
-  e → f  -> *⦇e [He]⦈* →@* *⦇f [Hf]⦈*.
+  e → f  -> *⦇e⦈* →@* *⦇f⦈*.
 Proof.
-  intros. induction H.
-  - inversion He ; subst. inversion H1 ; subst. admit.
-  - inversion He ; subst. admit.
-  - inversion He ; subst. inversion H1 ; subst. admit.
-  - inversion He ; subst. inversion Hf ; subst. admit.
-  - inversion He ; subst. inversion Hf ; subst. admit.
-Admitted.
+  intros. induction H ; eauto using step_ext, star_ext, step, star.
+Qed.
 
 End Translation.
