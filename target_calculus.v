@@ -47,7 +47,11 @@ Inductive step : term -> term -> Prop :=
 | Step_joinapp_l s s' :
    step s s' -> step (App Join s) (App Join s')
 | Step_joinapp_r l t t' :
-   step t t' -> step ((Label l) @ t) ((Label l) @ t').
+   step t t' -> step ((Label l) @ t) ((Label l) @ t')
+| Step_left s s' t :
+  step (Pair s t) (Pair s' t)
+| Step_right s t t' :
+  step (Pair s t) (Pair s t').
 
 Notation "s → t" := (step s t) (at level 70).
 
