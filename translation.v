@@ -58,16 +58,16 @@ Lemma translation_app e1 e2 (H1 : is_term e1) (H2 : is_term e2) :
   ⦇source_calculus.App e1 e2 [AppTerm e1 e2 H1 H2]⦈ =
      (App Fst (App (fst ⦇e1 [H1]⦈) *⦇e2 [H2]⦈*),
       (snd ⦇e1 [H1]⦈) @ (App Snd (App (fst ⦇e1 [H1]⦈) *⦇e2 [H2]⦈*))).
-Proof. simpl. admit. Admitted.
+Proof. simpl. now destruct ⦇e1 [H1]⦈. Qed.
 
 Lemma translation_let e1 e2 (H1 : is_term e1) (H2 : is_term e2) :
   ⦇source_calculus.Let e1 e2 [LetTerm e1 e2 H1 H2]⦈ =
     (Let *⦇e1 [H1]⦈* (fst ⦇e2 [H2]⦈), Let *⦇e1 [H1]⦈* (snd ⦇e2 [H2]⦈)).
-Proof. simpl. admit. Admitted.
+Proof. simpl. now destruct ⦇e2 [H2]⦈. Qed.
 
 Lemma translation_label l e (H : is_term e) :
   ⦇source_calculus.Label e l [LabelTerm e l H]⦈ = (fst ⦇e [H]⦈, (Label (translate_label l)) @ (snd ⦇e [H]⦈)).
-Proof. simpl. admit. Admitted.
+Proof. simpl. now destruct ⦇e [H]⦈. Qed.
 
 Notation "s → t" := (source_calculus.step s t) (at level 70).
 Notation "s →@* t" := (target_calculus.star_ext s t) (at level 70).
