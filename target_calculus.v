@@ -1,10 +1,15 @@
 Require Import Autosubst.
+Require Import poset.
+Require Import semilattice.
 
 Section TargetCalculus.
 
 Parameter label : Set.
+Parameter precedes : label -> label -> Prop.
 Parameter bottom : label.
 Parameter join : label -> label -> label.
+Parameter poset : Poset label precedes.
+Parameter semilattice : UpperSemiLattice poset join bottom.
 
 Notation "l ⋎ m" := (join l m) (at level 70).
 
