@@ -25,6 +25,14 @@ Inductive term : Type :=
 | Label (l : label)
 | Join.
 
+Inductive isValue : term -> Prop :=
+| const_value k : isValue (Const k)
+| abs_value s : isValue (Abs s)
+| fst_value : isValue Fst
+| snd_value : isValue Snd
+| label_value l : isValue (Label l)
+| join_value : isValue Join.
+
 Notation "l @ m" := (App (App Join l) m) (at level 70).
 
 Instance Ids_term : Ids term. derive. Defined.
