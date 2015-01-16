@@ -32,23 +32,30 @@ Inductive is_term : prefix -> Prop :=
 | LetTerm s t : is_term s -> is_term t -> is_term (Let s t)
 | LabelTerm s l : is_term s -> is_term (Label s l).
 
-(*
-Rather than use contexts that abstract over e.g. call-by-name and call-by value,
-we extend the evaluation relation for call-by-name
-*)
-
 Inductive step : prefix -> prefix -> Prop :=
 | Step_beta (s t : prefix) :
    step (App (Abs s) t) s.[t/]
 | Step_let (s t : prefix) :
    step (Let s t) t.[s/]
 | Step_lift (s t : prefix) (l : label) :
-   step (App (Label s l) t) (Label (App s t) l)
-| Step_app s s' t :
-   step s s' -> step (App s t) (App s' t)
-| Step_label (s s' : prefix) (l : label) :
-   step s s' -> step (Label s l) (Label s' l).
-Notation "s → t" := (step s t) (at level 70).
+   step (App (Label s l) t) (Label (App s t) l).
+
+Inductive full_step : prefix -> prefix -> Prop :=
+| FullStep_step (s t : prefix) :
+   step s t -> full_step s t
+| FullStep_abs (s t : prefix) :
+   full_step s t -> full_step (Abs s) (Abs t)
+| FullStep_app_l (s s' t : prefix) :
+   full_step s s' -> full_step (App s t) (App s' t)
+| FullStep_app_r (s t t' : prefix) :
+   full_step t t' -> full_step (App s t) (App s t')
+| FullStep_let_l (s s' t : prefix) :
+   full_step s s' -> full_step (Let s t) (Let s' t)
+| FullStep_let_r (s t t' : prefix) :
+   full_step t t' -> full_step (Let s t) (Let s t')
+| FullStep_label (s t : prefix) (l : label) :
+   full_step s t -> full_step (Label s l) (Label t l).
+Notation "s → t" := (full_step s t) (at level 70).
 
 Inductive star : prefix -> prefix -> Prop :=
 | StarR p : star p p
@@ -134,19 +141,31 @@ Proof.
 Qed.
 
 Lemma match_step (p1 p2 p1': prefix) :
-  p1 ⪯ p2 -> p1 → p1' -> exists p2', p2 → p2' /\ p1' ⪯ p2'.
+  p1 ⪯ p2 -> step p1 p1' -> exists p2', step p2 p2' /\ p1' ⪯ p2'.
 Proof.
   intros. revert p2 H. induction H0 ; intros ; inversion H ; subst.
-  - inversion H2 ; subst. exists s0.[t2/]. split.
-    + constructor.
-    + apply subst_match2' ; assumption.
-  - exists t2.[s2/]. split.
-    + constructor.
-    + apply subst_match2' ; assumption.
-  - inversion H2 ; subst. exists (Label (App s0 t2) l2). split ; constructor ; auto.
-    constructor ; assumption.
-  - destruct ((IHstep s2) H3) as [x [H1 H2]]. exists (App x t2). split ; now constructor.
-  - destruct ((IHstep s2) H5) as [x [H1 H2]]. exists (Label x l2). split ; now constructor.
+  - inversion H2 ; subst. exists s0.[t2/]. auto using step, subst_match2'.
+  - exists t2.[s2/]. auto using step, subst_match2'.
+  - inversion H2 ; subst. exists (Label (App s0 t2) l2). auto using step, prefix_match.
+Qed.
+
+Lemma match_fullstep (p1 p2 p1': prefix) :
+  p1 ⪯ p2 -> p1 → p1' -> exists p2', p2 → p2' /\ p1' ⪯ p2'.
+Proof.
+  intros. revert p2 H. induction H0 ; intros.
+  - destruct (match_step s p2 t) as [p2' []] ; auto. exists p2'. auto using full_step.
+  - inversion H ; subst. destruct (IHfull_step s2) as [s2' []] ; auto.
+    exists (Abs s2'). auto using full_step, prefix_match.
+  - inversion H ; subst. destruct (IHfull_step s2) as [s2' []] ; auto.
+    exists (App s2' t2). auto using full_step, prefix_match.
+  - inversion H ; subst. destruct (IHfull_step t2) as [t2' []] ; auto.
+    exists (App s2 t2'). auto using full_step, prefix_match.
+  - inversion H ; subst. destruct (IHfull_step s2) as [s2' []] ; auto.
+    exists (Let s2' t2). auto using full_step, prefix_match.
+  - inversion H ; subst. destruct (IHfull_step t2) as [t2' []] ; auto.
+    exists (Let s2 t2'). auto using full_step, prefix_match.
+  - inversion H ; subst. destruct (IHfull_step s2) as [s2' []] ; auto.
+    exists (Label s2' l2). auto using full_step, prefix_match.
 Qed.
 
 Lemma prefix_monotonicity (e e' f : prefix) :
@@ -154,7 +173,7 @@ Lemma prefix_monotonicity (e e' f : prefix) :
 Proof.
   intros. revert e' H. induction H1 as [e|e x f] ; intros.
   - rewrite (term_match e e') ; try constructor ; assumption.
-  - destruct (match_step e e' x) as [x' [H3 H4]] ; try assumption. assert (x' →* f) by auto.
+  - destruct (match_fullstep e e' x) as [x' [H3 H4]] ; try assumption. assert (x' →* f) by auto.
     apply (StarC e' x' f) ; assumption.
 Qed.
 
@@ -198,23 +217,23 @@ Qed.
 Lemma filter_beta p e1 e2 :
   ⌊ App (Abs e1) e2 ⌋p → ⌊ e1.[e2/] ⌋p.
 Proof.
-  rewrite <- filter_subst. asimpl. constructor.
+  rewrite <- filter_subst. asimpl. auto using step, full_step.
 Qed.
 
 Lemma filter_let p e1 e2 :
   ⌊ Let e1 e2 ⌋p → ⌊ e2.[e1/] ⌋p.
 Proof.
-  rewrite <- filter_subst. asimpl. constructor.
+  rewrite <- filter_subst. asimpl. auto using step, full_step.
 Qed.
 
 Lemma filter_lift p e1 e2 l :
   p l = true -> ⌊ App (Label e1 l) e2 ⌋p → ⌊ Label (App e1 e2) l ⌋p.
 Proof.
-  intros. simpl. rewrite H. constructor.
+  intros. simpl. rewrite H. auto using step, full_step.
 Qed.
 
 Lemma filter_step {s s'} :
-  s → s' -> forall p, (⌊ s ⌋p → ⌊ s' ⌋p) \/ ⌊ s' ⌋p ⪯ ⌊ s ⌋p.
+  step s s' -> forall p, (⌊ s ⌋p → ⌊ s' ⌋p) \/ ⌊ s' ⌋p ⪯ ⌊ s ⌋p.
 Proof.
   intros. induction H.
   - left. apply filter_beta.
@@ -222,30 +241,29 @@ Proof.
   - case_eq (p l) ; intros.
     + left. now apply filter_lift.
     + simpl. rewrite H. right. constructor.
-  - destruct IHstep.
-    + left. now constructor.
-    + right. simpl. constructor. apply H0. apply match_refl.
-  - destruct IHstep.
-    + simpl. destruct (p l). left. constructor. apply H0. right. constructor.
-    + right. simpl. destruct (p l) ; now constructor.
 Qed.
 
-Lemma hole_step f :
-  Hole →* f -> f = Hole.
+Lemma filter_fullstep {s s'} :
+  s → s' -> forall p, (⌊ s ⌋p → ⌊ s' ⌋p) \/ ⌊ s' ⌋p ⪯ ⌊ s ⌋p.
 Proof.
-  intros H. inversion H.
-  - reflexivity.
-  - inversion H0.
+  intros. induction H ; simpl.
+  - now apply filter_step.
+  - destruct IHfull_step ; auto using full_step, prefix_match.
+  - destruct IHfull_step ; auto using full_step, prefix_match, match_refl.
+  - destruct IHfull_step ; auto using full_step, prefix_match, match_refl.
+  - destruct IHfull_step ; auto using full_step, prefix_match, match_refl.
+  - destruct IHfull_step ; auto using full_step, prefix_match, match_refl.
+  - case_eq (p l) ; intros.
+    + destruct IHfull_step ; auto using full_step, prefix_match.
+    + auto using prefix_match.
 Qed.
-
-Inductive box T := Box (H : T).
 
 Theorem stability e f p :
   is_term f -> e →* f -> ⌊ f ⌋p = f -> ⌊ e ⌋p →* f.
 Proof.
   intros. induction H0.
   - rewrite H1. constructor.
-  - destruct (filter_step H0 p).
+  - destruct (filter_fullstep H0 p).
     + econstructor ; eauto.
     + eapply prefix_monotonicity ; eauto.
 Qed.
