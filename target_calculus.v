@@ -50,19 +50,27 @@ Inductive step : term -> term -> Prop :=
 | Step_snd s t :
    step (App Snd (Pair s t)) t
 | Step_join l m :
-   step ((Label l) @ (Label m)) (Label (l ⋎ m))
-| Step_app s s' t :
-   step s s' -> step (App s t) (App s' t)
-| Step_fstapp s s' :
-   step s s' -> step (App Fst s) (App Fst s')
-| Step_sndapp t t' :
-   step t t' -> step (App Snd t) (App Snd t')
-| Step_joinapp_l s s' :
-   step s s' -> step (App Join s) (App Join s')
-| Step_joinapp_r l t t' :
-   step t t' -> step ((Label l) @ t) ((Label l) @ t').
+   step ((Label l) @ (Label m)) (Label (l ⋎ m)).
 
-Notation "s → t" := (step s t) (at level 70).
+Inductive full_step : term -> term -> Prop :=
+| FullStep_step s t :
+   step s t -> full_step s t
+| FullStep_abs s t :
+   full_step s t -> full_step (Abs s) (Abs t)
+| FullStep_app_l s s' t :
+   full_step s s' -> full_step (App s t) (App s' t)
+| FullStep_app_r s t t' :
+   full_step t t' -> full_step (App s t) (App s t')
+| FullStep_let_l s s' t :
+   full_step s s' -> full_step (Let s t) (Let s' t)
+| FullStep_let_r s t t' :
+   full_step t t' -> full_step (Let s t) (Let s t')
+| FullStep_pair_l s s' t :
+   full_step s s' -> full_step (Pair s t) (Pair s' t)
+| FullStep_pair_r s t t':
+   full_step t t' -> full_step (Pair s t) (Pair s t').
+
+Notation "s → t" := (full_step s t) (at level 70).
 
 Inductive step_ext : term -> term -> Prop :=
 | Step s t : s → t -> step_ext s t
