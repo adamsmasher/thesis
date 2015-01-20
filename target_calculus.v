@@ -75,7 +75,7 @@ Notation "s → t" := (full_step s t) (at level 70).
 Inductive step_ext : term -> term -> Prop :=
 | Step s t : s → t -> step_ext s t
 | Step_assoc e1 e2 e3 : step_ext ((e1 @ e2) @ e3) (e1 @ (e2 @ e3))
-| Step_neutral e : step_ext (Label bottom) e.
+| Step_neutral e : step_ext ((Label bottom) @ e) e.
 
 Notation "s →@ t" := (step_ext s t) (at level 70).
 
