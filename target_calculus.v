@@ -84,4 +84,12 @@ Inductive star_ext : term -> term -> Prop :=
 | StarC x y z : x →@ y -> star_ext y z -> star_ext x z.
 Notation "s →@* t" := (star_ext s t) (at level 70).
 
+Lemma star_trans s t u :
+  s →@* t -> t →@* u -> s →@* u.
+Proof.
+  intros. revert u H0. induction H ; intros ; simpl.
+  - assumption.
+  - eapply StarC. eassumption. apply IHstar_ext. assumption.
+Qed.
+
 End TargetCalculus.
