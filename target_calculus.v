@@ -50,7 +50,11 @@ Inductive step : term -> term -> Prop :=
 | Step_snd s t :
    step (App Snd (Pair s t)) t
 | Step_join l m :
-   step ((Label l) @ (Label m)) (Label (l ⋎ m)).
+   step ((Label l) @ (Label m)) (Label (l ⋎ m))
+| Step_assoc s t u :
+   step ((s @ t) @ u) (s @ (t @ u))
+| Step_neutral s :
+   step ((Label bottom) @ s) s.
 
 Inductive full_step : term -> term -> Prop :=
 | FullStep_step s t :
@@ -72,24 +76,17 @@ Inductive full_step : term -> term -> Prop :=
 
 Notation "s → t" := (full_step s t) (at level 70).
 
-Inductive step_ext : term -> term -> Prop :=
-| Step s t : s → t -> step_ext s t
-| Step_assoc e1 e2 e3 : step_ext ((e1 @ e2) @ e3) (e1 @ (e2 @ e3))
-| Step_neutral e : step_ext ((Label bottom) @ e) e.
-
-Notation "s →@ t" := (step_ext s t) (at level 70).
-
-Inductive star_ext : term -> term -> Prop :=
-| StarR p : star_ext p p
-| StarC x y z : x →@ y -> star_ext y z -> star_ext x z.
-Notation "s →@* t" := (star_ext s t) (at level 70).
+Inductive star : term -> term -> Prop :=
+| StarR p : star p p
+| StarC x y z : x →@ y -> star y z -> star x z.
+Notation "s →* t" := (star s t) (at level 70).
 
 Lemma star_trans s t u :
-  s →@* t -> t →@* u -> s →@* u.
+  s →* t -> t →* u -> s →* u.
 Proof.
   intros. revert u H0. induction H ; intros ; simpl.
   - assumption.
-  - eapply StarC. eassumption. apply IHstar_ext. assumption.
+  - eapply StarC. eassumption. apply IHstar. assumption.
 Qed.
 
 End TargetCalculus.
