@@ -189,9 +189,9 @@ Definition label_filter (p : label -> bool) :=
   end. 
 Notation "⌊ e ⌋ p" := (label_filter p e) (at level 70).
 
-Lemma ren_filter (sigma : var -> prefix) xi p : sigma >>> (label_filter p >>> subst (xi >>> ids)) = (sigma >>> subst (xi >>> ids)) >>> label_filter p.
+Lemma ren_filter xi p : label_filter p >>> subst (xi >>> ids) = subst (xi >>> ids) >>> label_filter p.
 Proof.
-  f_ext. intros. simpl. generalize (sigma x). intros s. revert xi. induction s; intros; asimpl; try f_equal; eauto.
+  f_ext. intros s. simpl. revert xi. induction s; intros; asimpl; try f_equal; eauto.
   destruct (p l); asimpl; try f_equal; eauto.
 Qed.
 
