@@ -40,6 +40,16 @@ Inductive step : prefix -> prefix -> Prop :=
 | Step_lift (s t : prefix) (l : label) :
    step (App (Label s l) t) (Label (App s t) l).
 
+Inductive cbn : prefix -> prefix -> Prop :=
+| CBN_step s t : step s t -> cbn s t
+| CBN_app s s' t : cbn s s' -> cbn (App s t) (App s' t)
+| CBN_label s s' l : cbn s s' -> cbn (Label s l) (Label s' l).
+
+Inductive is_value : prefix -> Prop :=
+| Value_const k : is_value (Const k)
+| Value_abs e : is_value (Abs e)
+| Value_label l v : is_value v -> is_value (Label v l).
+
 Inductive full_step : prefix -> prefix -> Prop :=
 | FullStep_step (s t : prefix) :
    step s t -> full_step s t
