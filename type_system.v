@@ -14,7 +14,7 @@ Class TypeSystem
   labels : forall l m, has_type (Label l) (lift_label m) -> precedes l m;
   integers : forall v, has_type v int <-> exists k, v = Const k;
   pairs1 : forall e f t u, has_type (Pair e f) (pair t u) -> has_type e t /\ has_type f u;
-  pairs2 : forall e f t u v, has_type e t -> has_type f u -> has_type (Pair e f) v
+  pairs2 : forall e f t u, has_type e t -> has_type f u -> exists v, has_type (Pair e f) v
 }.
 
 Parameter type : Type.
