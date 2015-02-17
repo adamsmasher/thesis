@@ -69,6 +69,8 @@ Inductive step : term -> term -> Prop :=
 Inductive cbn : term -> term -> Prop :=
 | CBN_step s t :
    step s t -> cbn s t
+| CBN_app s s' t :
+   cbn s s' -> cbn (App s t) (App s' t)
 | CBN_fst s s' :
    cbn s s' -> cbn (App Fst s) (App Fst s')
 | CBN_snd s s' :
