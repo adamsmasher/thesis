@@ -32,3 +32,11 @@ Proof.
   - assumption.
   - apply IHstar. eapply subj_red ; eassumption.
 Qed.
+
+Lemma source_subj_red e f t :
+  is_term e -> is_term f -> has_type (translation e) t -> source_calculus.full_step e f -> exists u, eta_eq u (translation f) /\ has_type u t.
+Proof.
+  intros. edestruct (simulation e f) as [u []] ; auto. exists u. split.
+  - assumption.
+  - eapply subj_red_star ; eassumption.
+Qed.
