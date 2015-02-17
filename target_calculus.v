@@ -34,6 +34,15 @@ Inductive isValue : term -> Prop :=
 | label_value l : isValue (Label l)
 | join_value : isValue Join.
 
+Inductive is_subexpr : term -> term -> Prop :=
+| Sub_app s : is_subexpr s (Abs s)
+| Sub_app_l s t : is_subexpr s (App s t)
+| Sub_app_r s t : is_subexpr t (App s t)
+| Sub_let_l s t : is_subexpr s (Let s t)
+| Sub_let_r s t : is_subexpr t (Let s t)
+| Sub_pair_l s t : is_subexpr s (Pair s t)
+| Sub_pair_r s t : is_subexpr t (Pair s t).
+
 Notation "l @ m" := (App (App Join l) m) (at level 70).
 
 Instance Ids_term : Ids term. derive. Defined.
