@@ -57,6 +57,28 @@ Inductive step : term -> term -> Prop :=
 | Step_neutral s :
    step ((Label bottom) @ s) s.
 
+Inductive cbn : term -> term -> Prop :=
+| CBN_step s t :
+   step s t -> cbn s t
+| CBN_fst s s' :
+   cbn s s' -> cbn (App Fst s) (App Fst s')
+| CBN_snd s s' :
+   cbn s s' -> cbn (App Snd s) (App Snd s')
+| CBN_join_l s s' :
+   cbn s s' -> cbn (App Join s) (App Join s')
+| CBN_join_r s t t' :
+   cbn t t' -> cbn (App (App Join s) t) (App (App Join s) t').
+
+Inductive is_value : term -> Prop :=
+| Value_const k : is_value (Const k)
+| Value_abs e : is_value (Abs e)
+| Value_pair s t : is_value (Pair s t)
+| Value_fst : is_value Fst
+| Value_snd : is_value Snd
+| Value_label l : is_value (Label l)
+| Value_join : is_value Join
+| Value_join_label l : is_value (App Join (Label l)).
+
 Inductive full_step : term -> term -> Prop :=
 | FullStep_step s t :
    step s t -> full_step s t
