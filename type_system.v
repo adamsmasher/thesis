@@ -9,6 +9,7 @@ Class TypeSystem
     (int : type)
     (pair : type -> type -> type)
 := {
+  compositionality : forall e f t, is_subexpr e f -> has_type f t -> exists u, has_type e u;
   subj_red : forall e f t, has_type e t -> full_step e f -> has_type f t;
   progress : forall e t, has_type e t -> (exists f, cbn e f) \/ is_value e;
   labels : forall l m, has_type (Label l) (lift_label m) -> precedes l m;
