@@ -50,6 +50,18 @@ Instance Rename_term : Rename term. derive. Defined.
 Instance Subst_term : Subst term. derive. Defined.
 Instance SubstLemmas_term : SubstLemmas term. derive. Defined.
 
+Definition is_closed (s : term)  := forall sigma, s.[sigma] = s.
+
+Lemma label_closed l :
+  is_closed (Label l).
+Proof. intro sigma. now simpl. Qed.
+
+Lemma pair_closed s t :
+  is_closed s -> is_closed t -> is_closed (Pair s t).
+Proof.
+  intros Hs Ht sigma. simpl. now rewrite Hs, Ht.
+Qed.
+
 Inductive step : term -> term -> Prop :=
 | Step_beta (s t : term) :
    step (App (Abs s) t) s.[t/]

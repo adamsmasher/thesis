@@ -24,6 +24,8 @@ Instance Rename_prefix : Rename prefix. derive. Defined.
 Instance Subst_prefix : Subst prefix. derive. Defined.
 Instance SubstLemmas_prefix : SubstLemmas prefix. derive. Defined.
 
+Definition is_closed (s : prefix) : Prop := forall sigma, s.[sigma] = s.
+
 Inductive is_term : prefix -> Prop :=
 | ConstTerm k : is_term (Const k)
 | VarTerm x : is_term (Var x)
