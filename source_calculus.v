@@ -24,8 +24,6 @@ Instance Rename_prefix : Rename prefix. derive. Defined.
 Instance Subst_prefix : Subst prefix. derive. Defined.
 Instance SubstLemmas_prefix : SubstLemmas prefix. derive. Defined.
 
-Definition is_closed (s : prefix) : Prop := forall sigma, s.[sigma] = s.
-
 Inductive is_term : prefix -> Prop :=
 | ConstTerm k : is_term (Const k)
 | VarTerm x : is_term (Var x)
@@ -33,6 +31,16 @@ Inductive is_term : prefix -> Prop :=
 | AppTerm s t : is_term s -> is_term t -> is_term (App s t)
 | LetTerm s t : is_term s -> is_term t -> is_term (Let s t)
 | LabelTerm s l : is_term s -> is_term (Label s l).
+
+Inductive n_closed (n : nat) : prefix -> Prop :=
+| ConstClosed k : n_closed n (Const k)
+| VarClosed x : x < n -> n_closed n (Var x)
+| AbsClosed s : n_closed (S n) s -> n_closed n (Abs s)
+| LetClosed s t : n_closed n s -> n_closed (S n) t -> n_closed n (Let s t)
+| AppClosed s t : n_closed n s -> n_closed n t -> n_closed n (App s t)
+| LabelClosed s l : n_closed n s -> n_closed n (Label s l).
+
+Definition is_closed := n_closed 0.
 
 Inductive step : prefix -> prefix -> Prop :=
 | Step_beta (s t : prefix) :
