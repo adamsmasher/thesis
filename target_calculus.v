@@ -50,17 +50,19 @@ Instance Rename_term : Rename term. derive. Defined.
 Instance Subst_term : Subst term. derive. Defined.
 Instance SubstLemmas_term : SubstLemmas term. derive. Defined.
 
-Definition is_closed (s : term)  := forall sigma, s.[sigma] = s.
+Inductive n_closed (n : nat) : term -> Prop :=
+| ConstClosed k : n_closed n (Const k)
+| VarClosed x : x < n -> n_closed n (Var x)
+| AbsClosed s : n_closed (S n) s -> n_closed n (Abs s)
+| LetClosed s t : n_closed n s -> n_closed (S n) t -> n_closed n (Let s t)
+| AppClosed s t : n_closed n s -> n_closed n t -> n_closed n (App s t)
+| PairClosed s t : n_closed n s -> n_closed n t -> n_closed n (Pair s t)
+| FstClosed : n_closed n Fst
+| SndClosed : n_closed n Snd
+| JoinClosed : n_closed n Join
+| LabelClosed l : n_closed n (Label l).
 
-Lemma label_closed l :
-  is_closed (Label l).
-Proof. intro sigma. now simpl. Qed.
-
-Lemma pair_closed s t :
-  is_closed s -> is_closed t -> is_closed (Pair s t).
-Proof.
-  intros Hs Ht sigma. simpl. now rewrite Hs, Ht.
-Qed.
+Definition is_closed := n_closed 0.
 
 Inductive step : term -> term -> Prop :=
 | Step_beta (s t : term) :
