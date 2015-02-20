@@ -40,6 +40,68 @@ Fixpoint translation (e : source_calculus.prefix) : target_calculus.term :=
       ((Label (translate_label l)) @ (eta_snd (translation e)))
   end.
 
+Lemma translation_closed_fst e n :
+  n_closed n e -> n_closed n (eta_fst e).
+Proof.
+  intros. destruct e ; simpl.
+  - repeat constructor.
+  - constructor.
+    + constructor.
+    + assumption.
+  - inversion H ; subst. repeat constructor ; auto.
+  - inversion H ; subst. repeat constructor ; auto.
+  - inversion H ; subst. repeat constructor ; auto.
+  - inversion H ; subst. auto.
+  - repeat constructor.
+  - repeat constructor.
+  - repeat constructor.
+  - repeat constructor.
+Qed.
+
+Lemma translation_closed_snd e n :
+  n_closed n e -> n_closed n (eta_snd e).
+Proof.
+  intros. destruct e ; simpl.
+  - repeat constructor.
+  - constructor.
+    + constructor.
+    + assumption.
+  - inversion H ; subst. repeat constructor ; auto.
+  - inversion H ; subst. repeat constructor ; auto.
+  - inversion H ; subst. repeat constructor ; auto.
+  - inversion H ; subst. auto.
+  - repeat constructor.
+  - repeat constructor.
+  - repeat constructor.
+  - repeat constructor.
+Qed.
+
+Lemma translation_closed e (H : is_term e) n :
+  source_calculus.n_closed n e -> n_closed n (translation e).
+Proof.
+  revert n. induction e ; simpl ; intros.
+  - inversion H.
+  - repeat constructor.
+  - constructor. ainv.
+  - ainv. constructor.
+    + constructor. now apply IHe.
+    + constructor.
+  - ainv. repeat constructor.
+    + apply translation_closed_fst. now apply IHe1.
+    + now apply IHe2.
+    + apply translation_closed_snd. now apply IHe1.
+    + apply translation_closed_fst. now apply IHe1.
+    + now apply IHe2.
+  - ainv. repeat constructor.
+    + now apply IHe.
+    + apply translation_closed_fst. now apply IHe0.
+    + now apply IHe.
+    + apply translation_closed_snd. now apply IHe0.
+  - ainv. repeat constructor.
+    + apply translation_closed_fst. now apply IHe.
+    + apply translation_closed_snd. now apply IHe.
+Qed.
+
 Inductive eta_eq : term -> term -> Prop :=
 | EtaEqR s : eta_eq s s
 | EtaEqS s t : eta_eq s t -> eta_eq t s
