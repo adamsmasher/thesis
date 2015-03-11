@@ -64,6 +64,20 @@ Inductive n_closed (n : nat) : term -> Prop :=
 
 Definition is_closed := n_closed 0.
 
+Lemma n_close_S s n :
+  n_closed n s -> n_closed (S n) s.
+Proof.
+  intros. revert n H. induction s ; intros ; ainv ; constructor ; auto.
+Qed.
+
+Lemma close_up s n :
+  n_closed n s -> forall m, n <= m -> n_closed m s.
+Proof.
+  intros. induction m.
+  - ainv.
+  - ainv. now apply n_close_S, IHm.
+Qed.
+
 Inductive step : term -> term -> Prop :=
 | Step_beta (s t : term) :
    step (App (Abs s) t) s.[t/]
@@ -123,6 +137,21 @@ Inductive full_step : term -> term -> Prop :=
    full_step t t' -> full_step (Pair s t) (Pair s t').
 
 Notation "s → t" := (full_step s t) (at level 70).
+
+Lemma subst_close s t :
+  is_closed t -> n_closed 1 s -> is_closed s.[t/].
+Proof.
+Admitted.
+
+Lemma closed_step e f :
+  is_closed e -> step e f -> is_closed f.
+Proof.
+  induction 2 ; ainv.
+  - apply subst_close ; auto.
+  - apply subst_close ; auto.
+  - constructor.
+  - repeat constructor ; assumption.
+Qed.
 
 Inductive star : term -> term -> Prop :=
 | StarR p : star p p
