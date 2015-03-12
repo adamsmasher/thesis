@@ -76,11 +76,11 @@ Proof.
   - repeat constructor.
 Qed.
 
-Lemma translation_closed e (H : is_term e) n :
+Lemma translation_closed e n :
   source_calculus.n_closed n e -> n_closed n (translation e).
 Proof.
   revert n. induction e ; simpl ; intros.
-  - inversion H.
+  - repeat constructor.
   - repeat constructor.
   - constructor. ainv.
   - ainv. constructor.
