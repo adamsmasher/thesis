@@ -75,18 +75,30 @@ Proof.
   - edestruct abs_types ; eauto.
 Qed.
 
-Lemma eta_fst_trans e t (H : is_term e) :
+Lemma eta_fst_trans e t (Hterm : is_term e) (Hclosed : source_calculus.is_closed e) :
   has_type (translation e) t -> exists u, has_type (eta_fst (translation e)) u.
 Proof.
-  revert t. induction e ; simpl ; intros.
-  - inversion H.
+  induction e ; simpl ; intros.
+  - inversion Hterm.
   - exists int. apply integers ; eauto.
-  - admit. (* closed *)
-  - destruct (pair_types _ _ _ H0) as [u [v []]] ; eauto.
-  - destruct (pair_types _ _ _ H0) as [u [v []]] ; eauto.
-  - destruct (pair_types _ _ _ H0) as [u [v []]] ; eauto.
-  - destruct (pair_types _ _ _ H0) as [u [v []]] ; eauto.
-Admitted.
+  - inversion Hclosed. ainv.
+  - ainv. apply pair_types in H.
+    + repeat destruct H. eauto.
+    + constructor ; auto using translation_closed.
+    + constructor.
+  - ainv. apply pair_types in H.
+    + repeat destruct H. eauto.
+    + repeat constructor ; auto using translation_closed, translation_closed_fst.
+    + repeat constructor ; auto using translation_closed, translation_closed_fst, translation_closed_snd.
+  - ainv. apply pair_types in H.
+    + repeat destruct H. eauto.
+    + repeat constructor ; auto using translation_closed, translation_closed_fst.
+    + repeat constructor ; auto using translation_closed, translation_closed_snd.
+  - ainv. apply pair_types in H.
+    + repeat destruct H. eauto.
+    + now apply translation_closed_fst, translation_closed.
+    + repeat constructor. now apply translation_closed_snd, translation_closed.
+Qed.
 
 Lemma eta_snd_trans e t (H : is_term e) :
   has_type (translation e) t -> exists u, has_type (eta_snd (translation e)) u.
