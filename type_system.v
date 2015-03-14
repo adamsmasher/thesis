@@ -66,15 +66,6 @@ Proof.
   eauto.
 Qed.
 
-(*
-Lemma translate_abs e t (H : is_term e) :
-  has_type (translation (source_calculus.Abs e)) t -> exists u, has_type (translation e) u.
-Proof.
-  simpl ; intros. edestruct pair_types as [u [v []]].
-  - eassumption.
-  - edestruct abs_types ; eauto.
-Qed.
-
 Lemma eta_fst_trans e t (Hterm : is_term e) (Hclosed : source_calculus.is_closed e) :
   has_type (translation e) t -> exists u, has_type (eta_fst (translation e)) u.
 Proof.
