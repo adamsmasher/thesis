@@ -91,47 +91,39 @@ Proof.
     + repeat constructor. now apply translation_closed_snd, translation_closed.
 Qed.
 
-Lemma eta_snd_trans e t (H : is_term e) :
-  has_type (translation e) t -> exists u, has_type (eta_snd (translation e)) u.
+Lemma translate_etas e t u (Hterm : is_term e) (Hclosed : source_calculus.is_closed e) :
+  has_type (eta_fst (translation e)) t -> has_type (eta_snd (translation e)) u -> exists v, has_type (translation e) v.
 Proof.
-  revert t. induction e ; simpl ; intros.
-  - inversion H.
-  - exists (lift_label bottom). apply labels1.
-  - admit. (* TODO: closed *)
-  - destruct (pair_types _ _ _ H0) as [u [v []]] ; eauto.
-  - destruct (pair_types _ _ _ H0) as [u [v []]] ; eauto.
-  - destruct (pair_types _ _ _ H0) as [u [v []]] ; eauto.
-  - destruct (pair_types _ _ _ H0) as [u [v []]] ; eauto.
-Admitted.
-
-Lemma translate_eta_fst e t (H : is_term e) :
-  has_type (eta_fst (translation e)) t -> exists u, has_type (translation e) u.
-Proof.
-  revert t. induction e ; simpl ; intros.
-  - inversion H.
+  induction e ; simpl ; intros.
+  - inversion Hterm.
   - eapply pairs2.
     + eassumption.
     + apply labels1.
-  - admit. (* TODO: closed *)
-  - inversion H ; subst. edestruct abs_types ; eauto. edestruct eta_fst_trans ; eauto. edestruct IHe ; eauto.
-    eapply pairs2 ; eauto using labels1.
-  - inversion H ; subst. edestruct app_types as [u [v [H1 H2]]] ; eauto. destruct (app_types _ _ _ H2) as [u' [v' []]].
-    edestruct IHe1 ; eauto. admit.
-  - inversion H ; subst. admit.
+  - inversion Hclosed ; ainv.
+  - eapply pairs2 ; eauto using labels1.
   - eapply pairs2 ; eauto.
-Admitted.
-*)
-Lemma source_progress e t (H : is_term e) :
-  has_type (translation e) t -> (exists f, cbn (translation e) f) \/ is_value (translation e).
+  - eapply pairs2 ; eauto.
+  - eapply pairs2 ; eauto.
+Qed.
+
+Lemma source_progress e t (Hterm : is_term e) (Hclosed : source_calculus.is_closed e) :
+  has_type (translation e) t -> (exists f, source_calculus.cbn e f) \/ source_calculus.is_value e.
 Proof.
   revert t. induction e ; simpl ; intros.
-  - inversion H.
+  - inversion Hterm.
   - right. constructor.
-  - left. apply progress in H0. destruct H0.
-    + assumption.
-    + inversion H0.
+  - inversion Hclosed ; ainv.
   - right. constructor.
-  - left. inversion H ; subst. admit.
   - admit.
-  - admit.
+  - left. esplit. repeat constructor.
+  - ainv.
+    apply pair_types in H. repeat destruct H. apply app_types in H0. repeat destruct H0.
+    + assert (exists u, has_type (translation e) u) by eauto using translate_etas.
+       destruct H4. edestruct IHe ; eauto.
+       * destruct H5. left. eauto using source_calculus.cbn.
+       * right. now constructor.
+    + repeat constructor.
+    + now apply translation_closed_snd, translation_closed.
+    + now apply translation_closed_fst, translation_closed.
+    + repeat constructor. now apply translation_closed_snd, translation_closed.
 Admitted.
