@@ -106,6 +106,31 @@ Proof.
   - eapply pairs2 ; eauto.
 Qed.
 
+Inductive appliable : prefix -> Prop :=
+| AppliableAbs s : appliable (source_calculus.Abs s)
+| AppliableLift s l : appliable s -> appliable (source_calculus.Label s l).
+
+Lemma translation_appliable s t u :
+  is_term s -> cbn (App (eta_fst (translation s)) t) u -> source_calculus.is_value s -> appliable s.
+Proof.
+  intros. induction s ; ainv.
+  - inversion H0 ; ainv.
+  - constructor.
+  - constructor. apply IHs ; auto.
+Qed.
+
+Lemma appliable_exist_cbn s t :
+  appliable s -> exists u, source_calculus.cbn (source_calculus.App s t) u.
+Proof.
+  intros. induction H ; eauto using source_calculus.cbn, source_calculus.step.
+Qed.
+
+Lemma app_translation_reducible e1 e2 :
+  ~is_value (App (eta_fst (translation e1)) (translation e2)).
+Proof.
+  intro. induction e1 ; ainv. apply IHe1. rewrite <- H1.  rewrite <- H0. constructor.
+Qed.
+
 Lemma source_progress e t (Hterm : is_term e) (Hclosed : source_calculus.is_closed e) :
   has_type (translation e) t -> (exists f, source_calculus.cbn e f) \/ source_calculus.is_value e.
 Proof.
@@ -114,7 +139,34 @@ Proof.
   - right. constructor.
   - inversion Hclosed ; ainv.
   - right. constructor.
-  - admit.
+  - ainv.
+    apply pair_types in H. repeat destruct H. apply app_types in H. repeat destruct H.
+    apply app_types in H1. repeat destruct H1. apply app_types in H0. repeat destruct H0.
+    apply app_types in H0. repeat destruct H0.
+    + assert (exists u, has_type (translation e1) u) by eauto using translate_etas.
+       destruct H9. edestruct IHe1 ; eauto.
+       * destruct H10. left. eauto using source_calculus.cbn.
+       * apply app_types in H7. repeat destruct H7. apply progress in H11. destruct H11.
+       { destruct H11. left. apply appliable_exist_cbn. eapply translation_appliable ; eauto. }
+       { exfalso. eapply app_translation_reducible ; eassumption. }
+       { constructor. }
+       { constructor ; auto using translation_closed_fst, translation_closed. }
+    + constructor.
+    + now apply translation_closed_snd, translation_closed.
+    + constructor.
+       * constructor.
+       * now apply translation_closed_snd, translation_closed.
+    + constructor.
+       * constructor.
+       * constructor ; auto using translation_closed_fst, translation_closed.
+    + now apply translation_closed_fst, translation_closed.
+    + now apply translation_closed.
+    + constructor.
+    + constructor ; auto using translation_closed_fst, translation_closed.
+    + constructor.
+        * constructor.
+        * constructor ; auto using translation_closed_fst, translation_closed.
+    + constructor ; auto using translation_closed_fst, translation_closed_snd, translation_closed, n_closed.
   - left. esplit. repeat constructor.
   - ainv.
     apply pair_types in H. repeat destruct H. apply app_types in H0. repeat destruct H0.
@@ -126,4 +178,4 @@ Proof.
     + now apply translation_closed_snd, translation_closed.
     + now apply translation_closed_fst, translation_closed.
     + repeat constructor. now apply translation_closed_snd, translation_closed.
-Admitted.
+Qed.
