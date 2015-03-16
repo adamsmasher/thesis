@@ -138,21 +138,6 @@ Inductive full_step : term -> term -> Prop :=
 
 Notation "s → t" := (full_step s t) (at level 70).
 
-Lemma subst_close s t :
-  is_closed t -> n_closed 1 s -> is_closed s.[t/].
-Proof.
-Admitted.
-
-Lemma closed_step e f :
-  is_closed e -> step e f -> is_closed f.
-Proof.
-  induction 2 ; ainv.
-  - apply subst_close ; auto.
-  - apply subst_close ; auto.
-  - constructor.
-  - repeat constructor ; assumption.
-Qed.
-
 Inductive star : term -> term -> Prop :=
 | StarR p : star p p
 | StarC x y z : x → y -> star y z -> star x z.
