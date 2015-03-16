@@ -1,0 +1,308 @@
+\documentclass{beamer}
+\usepackage{listings}
+\usepackage{algpseudocode}
+\usepackage{stmaryrd}
+\usetheme{Frankfurt}
+\beamertemplatenavigationsymbolsempty
+\lstset{showstringspaces=false, frame=single}
+\title{Soundness of Information Flow Typing in Coq}
+\author{Adam Smith}
+\date{February 9, 2015}
+\begin{document}
+  \frame{\titlepage}
+  \section{Type Systems}
+  \subsection{Type Systems}
+  \begin{frame}
+    \frametitle{Type Systems}
+    \begin{itemize}
+      \item ``A type system is a syntactic method for enforcing levels of
+             abstraction in programs.'' - Pierce (2002)
+      \pause
+      \item Statically (at compile-time) ensure that operations are not
+            performed on inappropriate data
+      \pause
+      \item By restricting types of values, we can prevent them from
+            representing invalid states
+      \pause
+      \item Performance benefits
+      \pause
+      \item C/C++/Java programmers should be familiar with static type systems
+      \pause
+      \item Languages like Python, Perl, Ruby, PHP, Scheme/Lisp have no static
+            type system to speak of
+    \end{itemize}
+  \end{frame}
+\begin{frame}[fragile]
+    \frametitle{Type Systems In Action}
+    ``Statically (at compile-time) ensure that operations are not performed
+      on inappropriate data''
+    \begin{lstlisting}[language=C,
+                       captionpos=b,
+                       caption=A C program with a type error]
+      int add(int a, int b) {
+        return a + b;
+      }
+      add("Hello ", "world?");
+    \end{lstlisting}
+    \pause
+    G++ says ``\texttt{error: invalid conversion from `const char*' to `int'}''
+\end{frame}
+\begin{frame}[fragile]
+  \frametitle{Subtyping}
+  Informally: Subtyping allows multiple types to be used in the same context,
+  as long as they all adhere to some interface:
+  \begin{lstlisting}[language=Java,
+                     captionpos=b,
+                     caption=Subtyping in the Java programming language]
+    class A {
+      void foo() { /*...*/ }
+    }
+
+    class B extends A {
+      void foo() { /*...*/ }
+    }
+
+    void test(A a) { a.foo(); }
+
+    B b = new B();
+    test(b);
+  \end{lstlisting}
+\end{frame}
+\section{Information Flow Security}
+\subsection{Information Flow Security}
+\begin{frame}
+  \frametitle{What Is Information Flow Security?}
+  \begin{itemize}
+    \item Ensures that confidential data isn't accidentally or maliciously
+          leaked
+    \pause
+    \item Distinct from access control
+    \pause
+    \item Can be checked with types
+  \end{itemize}
+  \pause
+  \begin{definition}
+    \emph{Non-interference}: in any two runs of the program with the same
+    public inputs, the public output must be the same
+  \end{definition}
+\end{frame}
+\begin{frame}[fragile]
+  \frametitle{Example (From Sabelfeld \& Myers)}
+  \begin{algorithmic}
+    \State $h \gets h \mod 2$
+    \State $l \gets 0$
+    \If {$h = 1$}
+      \State $l \gets 1$
+    \EndIf
+  \end{algorithmic}
+  \pause
+  \vspace{5mm}
+  The final value of the public $l$ variable depends on the parity of the
+  private $h$ variable; hence non-interference is not satisfied.
+\end{frame}
+\begin{frame}
+  \frametitle{Checking Information Flow}
+  \begin{itemize}
+    \item Most common approach: define a new security-typed language and
+          prove proerties about it
+    \pause
+    \item See: Volpano, Smith, Irvine (1996), Heintze \& Riecke (1998),
+          Pottier \& Simonet (2002)...
+    \pause
+    \item Lots of work reproving basic correctness properties each time
+    \pause
+    \item A totally new system/language isn't as useful as extending
+          existing ones
+    \pause
+    \item Tends to be very heavyweight
+  \end{itemize}
+\end{frame}
+\section{Information Flow Inference For Free}
+\subsection{Information Flow Inference For Free}
+\begin{frame}
+  \frametitle{Information Flow Inference For Free}
+  \begin{itemize}
+    \item Following Pottier \& Conchon (2000)
+    \pause
+    \item Compile a security-typed language into a traditional ML-like language
+    \pause
+    \item Security errors manifest as type errors
+    \pause
+    \item We get inference and correctness of the whole system ``for free''
+  \end{itemize}
+\end{frame}
+\begin{frame}
+  \frametitle{The Source Calculus}
+  We start with a standard $\lambda$-calculus, extended with labels.
+  \pause
+  \begin{itemize}
+    \item $\beta$-reduction: $(\lambda x. e1)\; e2 \rightarrow e1[e2/x]$
+    \item Lifting labelled terms: $(l : e1)\; e2 \rightarrow l : (e1\; e2)$
+  \end{itemize}
+  The set of labels $L$ is arbitrary.
+  \pause
+  \begin{example}
+    $(L : (\lambda x y. y)) (H : 27) \rightarrow^* L : \lambda y. y$
+  \end{example}
+\end{frame}
+\begin{frame}
+  \frametitle{The Source Calculus - Stability}
+  \begin{theorem}
+  Stability: ``given a computation sequence $e \rightarrow^* f$...$f$ does not
+               depend on any subterm of $e$ which carries a label not found
+               in $f$''
+  \end{theorem}
+  \pause
+  \begin{example}
+    \begin{itemize}
+      \item Recall $(L : (\lambda x y. y)) (H : 27) \rightarrow^*
+                     L : \lambda y. y$
+      \pause
+      \item Doesn't depend on the H value!
+    \end{itemize}
+  \end{example}
+  \pause
+  In general, non-interference: an L-labelled expression's value
+  cannot depend on H-labelled data
+\end{frame}
+\begin{frame}
+  \frametitle{Translating The Source Calculus}
+  \begin{itemize}
+    \item Translate source calculus to a (theoretically existing) ML-like
+          language
+    \pause
+    \item Labels as terms \emph{and} types
+    \pause
+    \item Each source calculus expression paired with its highest label
+  \end{itemize}
+  \pause
+  \begin{example}
+    $\llparenthesis H : (L : 27) \rrparenthesis = \langle 27, H \rangle$ with
+    type $int * H$.
+  \end{example}
+  \pause
+  \begin{itemize}
+    \item Organize labels in an upper semi-lattice; derive subtyping relation
+          from lattice structure
+    \pause
+    \item Use type annotations to define information flow policy
+  \end{itemize}
+\end{frame}
+\begin{frame}
+  \frametitle{The Translation Scheme - Simulation}
+  \begin{theorem}
+    Simulation: if $e \rightarrow f$,
+                then $\llparenthesis e \rrparenthesis \rightarrow^*
+                       \llparenthesis f \rrparenthesis$
+  \end{theorem}
+  \begin{example}
+    Recall $L : (\lambda x y. y) (H : 27) \rightarrow L : \lambda y. y$
+           (abbreviate as $e \rightarrow f$)
+   \begin{align*}
+     \llparenthesis e \rrparenthesis =
+       \langle & \text{fst } ((\lambda x. \langle \lambda y. \text{fst } y,
+                                                  \epsilon\rangle)
+                              \langle 27, H \rangle)  \\
+               & L\; @\; \text{snd } ((\lambda x. \langle \lambda y.
+                                                     \text{fst } y,
+                                                          \epsilon\rangle)
+                          \langle 27, H \rangle) \rangle\\
+           \llparenthesis f \rrparenthesis =
+                  \langle & \lambda y. \langle \text{fst }y,
+                            \text{snd }y \rangle , L \rangle
+   \end{align*}
+   By simulation, $\llparenthesis e \rrparenthesis \rightarrow^*
+                   \llparenthesis f \rrparenthesis$
+  \end{example}
+\end{frame}
+\section{Formalization}
+\subsection{Formalization}
+\begin{frame}
+  \frametitle{The Coq Theorem Prover}
+  \begin{itemize}
+    \item In development for ~30 years, mainly in France (INRIA, \'{E}cole
+          Polytechnique, University of Paris-Sud, Paris Diderot University,
+          CNRS, \'{E}cole Normale Supérieure de Lyon)
+    \item Dependently-typed programming language
+    \item Logic based on the Calculus of Constructions
+    \item Curry-Howard Isomorphism: Type systems and logics are equivalent
+  \end{itemize}
+\end{frame}
+\begin{frame}
+  \frametitle{Our Formalization}
+  \begin{itemize}
+    \item Machine-checked proofs of Pottier \& Conchon's scheme
+    \item ~700 lines of Coq code
+    \item Relies on external Autosubst library (Sch\"{a}fer \& Tebbi 2014)
+          to handle substitution over terms
+    \item Incomplete
+  \end{itemize}
+\end{frame}
+\section{End Matter}
+\subsection{End Matter}
+\begin{frame}
+  \frametitle{Future Directions}
+  \begin{itemize}
+    \item Complete formalization
+    \item Extend to more practical languages -- mutable references, exceptions,
+          concurrency...
+      \begin{itemize}
+        \item Pottier \& Simonet (2002) reject label-based approach for full
+              ML: ``It appears difficult for a labelled semantics to account
+              for the effect of code that is \emph{not} executed; so the
+              approach must be reconsidered...''
+        \item Monadic transformations?
+        \item Region/effect/closure-based type?
+      \end{itemize}
+    \item Principled disclosure
+    \item ???
+  \end{itemize}
+\end{frame}
+\begin{frame}[allowframebreaks]
+  \frametitle{Bibliography}
+  \begin{thebibliography}
+    \beamertemplatearticlebibitems
+    \bibitem{Pottier2000}
+      Pottier, Fran\c{c}ois, and Sylvain Conchon.
+      \newblock ``Information Flow Inference For Free''.
+      \newblock {\em ACM Notices} 35.9 (2000): 46-57.
+    \beamertemplatebookbibitems
+    \bibitem{Pierce2002}
+      Pierce, Benjamin C.
+      \newblock {\em Types and Programming Languages}.
+      \newblock Cambridge, MA: MIT, 2002.
+    \beamertemplatearticlebibitems
+    \bibitem{Sabelfeld2003}
+      Sabelfeld, Andrei, and Andrew C. Myers.
+      \newblock ``Language-Based Information Flow Security''.
+      \newblock {\em IEEE Journal on Selected Areas in Communications}
+                21.1 (2003): 5-19.
+    \beamertemplatearticlebibitems
+    \bibitem{Volpano1996}
+      Volpano, Dennis, Geoffrey Smith, and Cynthia Irvine.
+      \newblock ``A Sound Type System for Secure Flow Analysis''.
+      \newblock {\em Journal of Computer Security} 4.3 (1996): 167-87.
+    \beamertemplatearticlebibitems
+    \bibitem{Heintze1998}
+      Heintze, Nevin, and John G. Riecke.
+      \newblock ``The SLam Calculus: Programming With Secrecy And Integrity''.
+      \newblock {\em POPL '98 Proceedings of the 25th ACM SIGPLAN-SIGACT
+                     Symposium on Principles of Programming Languages}
+                (1998): 365-77.
+    \beamertemplatearticlebibitems
+    \bibitem{Pottier2002}
+      Pottier, Fran\c{c}ois, and Vincent Simonet.
+      \newblock ``Information Flow Inference For ML''.
+      \newblock {\em ACM SIGPLAN Notices} 37.1 (2002): 319-30.
+    \beamertemplatearticlebibitems
+    \bibitem{Pottier2002}
+      Sch\"{a}fer, Steven, and Tobias Tebbi.
+      \newblock {\em Autosubst: Automation for de Bruijn syntax and
+                     substitution in Coq}
+      \newblock Web.
+  \end{thebibliography}
+\end{frame}
+\begin{frame}
+  \frametitle{Questions?}
+\end{frame}
+\end{document}
