@@ -48,6 +48,21 @@ Proof.
   - assumption.
 Qed.
 
+Lemma source_subj_red_star e f t :
+  is_term e -> is_term f -> has_type (translation e) t -> source_calculus.star e f -> has_type (translation f) t.
+Proof.
+  induction 4.
+  - assumption.
+  - apply IHstar.
+    + eauto using term_full_step.
+    + assumption.
+    + eapply source_subj_red.
+        * apply H.
+        * eauto using term_full_step.
+        * assumption.
+        * assumption.
+Qed.
+
 Lemma pair_types e f t :
   is_closed e -> is_closed f -> has_type (Pair e f) t -> exists u v, has_type e u /\ has_type f v.
 Proof.
