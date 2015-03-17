@@ -77,6 +77,45 @@ Inductive full_step : prefix -> prefix -> Prop :=
    full_step s t -> full_step (Label s l) (Label t l).
 Notation "s → t" := (full_step s t) (at level 70).
 
+Definition term_subst sigma := forall (x : var), is_term (sigma x).
+
+Lemma ren_term s r :
+  is_term s -> is_term s.[ren r].
+Proof.
+  revert r. induction s ; intros ; asimpl ; ainv ; constructor ; auto.
+Qed.
+
+Lemma up_term_subst sigma :
+  term_subst sigma -> term_subst (up sigma).
+Proof.
+  intros. intro x. destruct x ; asimpl.
+  - constructor.
+  - apply ren_term, H.
+Qed.
+
+Lemma term_repl s sigma :
+  is_term s -> term_subst sigma -> is_term s.[sigma].
+Proof.
+  revert sigma. induction s ; intros ; simpl ; ainv ; auto using is_term, up_term_subst.
+Qed.
+
+Lemma scons_term_subst t :
+  is_term t -> term_subst (t .: ids).
+Proof.
+  intros. intro x. destruct x ; simpl.
+  - assumption.
+  - constructor.
+Qed.
+
+Lemma term_step e f :
+  is_term e -> step e f -> is_term f.
+Proof.
+  induction 2 ; ainv.
+  - apply term_repl ; auto using scons_term_subst.
+  - apply term_repl ; auto using scons_term_subst.
+  - repeat constructor ; auto.
+Qed.
+
 Inductive star : prefix -> prefix -> Prop :=
 | StarR p : star p p
 | StarC x y z : x → y -> star y z -> star x z.
