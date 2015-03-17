@@ -31,7 +31,7 @@ Parameter TS : TypeSystem type has_type lift_label int pair.
 Lemma subj_red_star e f t :
   has_type e t -> star e f -> has_type f t.
 Proof.
-  intros. induction H0.
+  induction 2.
   - assumption.
   - apply IHstar. eapply subj_red.
     + apply H.

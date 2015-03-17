@@ -173,9 +173,9 @@ Qed.
 Lemma match_up sigma sigma':
   (forall t, sigma t ⪯ sigma' t) -> (forall t, up sigma t ⪯ up sigma' t).
 Proof.
-  intros. induction t ; asimpl.
+  intros. destruct t ; asimpl.
   - now constructor.
-  - apply subst_match. apply H.
+  - apply subst_match, H.
 Qed.
 
 Lemma subst_match2 s s' sigma sigma' :
