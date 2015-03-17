@@ -116,6 +116,19 @@ Proof.
   - repeat constructor ; auto.
 Qed.
 
+Lemma term_full_step e f :
+  is_term e -> full_step e f -> is_term f.
+Proof.
+  induction 2 ; ainv.
+  - eapply term_step ; eauto.
+  - constructor. now apply IHfull_step.
+  - constructor ; auto.
+  - constructor ; auto.
+  - constructor ; auto.
+  - constructor ; auto.
+  - constructor ; auto.
+Qed.
+
 Inductive star : prefix -> prefix -> Prop :=
 | StarR p : star p p
 | StarC x y z : x → y -> star y z -> star x z.
