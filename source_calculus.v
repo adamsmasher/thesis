@@ -135,6 +135,12 @@ Inductive star : prefix -> prefix -> Prop :=
 | StarC x y z : x → y -> star y z -> star x z.
 Notation "s →* t" := (star s t) (at level 70).
 
+Lemma term_star e f :
+  is_term e -> star e f -> is_term f.
+Proof.
+  induction 2 ; eauto using term_full_step.
+Qed.
+
 Inductive prefix_match : prefix -> prefix -> Prop :=
 | HoleMatch p : prefix_match Hole p
 | ConstMatch k1 k2 : k1 = k2 -> prefix_match (Const k1) (Const k2)
