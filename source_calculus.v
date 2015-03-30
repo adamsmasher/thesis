@@ -2,14 +2,9 @@
     Flow Inference for Free *)
 
 Require Import Autosubst.
+Require Import labels.
 
 Section SourceCalculus.
-
-(* as in the original paper, for now we leave
-     the set of labels entirely abstract *)
-
-Parameter label : Set.
-Parameter label_eq : forall (l1 l2 : label), {l1 = l2} + {~l1 = l2}.
 
 Inductive prefix : Type :=
 | Hole

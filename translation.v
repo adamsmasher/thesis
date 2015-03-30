@@ -1,15 +1,10 @@
 Require Import source_calculus.
 Require Import target_calculus.
+Require Import labels.
 
 Require Import Autosubst.
 
 Section Translation.
-
-Parameter label_eq : source_calculus.label = target_calculus.label.
-
-Definition translate_label (l : source_calculus.label) : target_calculus.label.
-  rewrite <- label_eq. exact l.
-Defined.
 
 Notation "l @ m" := (App (App Join l) m) (at level 70).
 
@@ -37,8 +32,21 @@ Fixpoint translation (e : source_calculus.prefix) : target_calculus.term :=
       (Let (translation e1) (eta_snd (translation e2)))
   | source_calculus.Label e l => Pair
       (eta_fst (translation e))
-      ((Label (translate_label l)) @ (eta_snd (translation e)))
+      ((Label l) @ (eta_snd (translation e)))
   end.
+
+Lemma translation_pair e :
+  is_term e -> (exists x, e = source_calculus.Var x /\ translation e = Var x) \/ (exists e1 e2, translation e = Pair e1 e2).
+Proof.
+  intros. destruct e ; simpl.
+  - inversion H.
+  - right. eauto.
+  - left. eauto.
+  - right. eauto.
+  - right. eauto.
+  - right. eauto.
+  - right. eauto.
+Qed.
 
 Lemma translation_closed_fst e n :
   n_closed n e -> n_closed n (eta_fst e).

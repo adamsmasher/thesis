@@ -1,6 +1,7 @@
 Require Import source_calculus.
 Require Import target_calculus.
 Require Import translation.
+Require Import labels.
 Require Import Autosubst.
 
 Class TypeSystem
