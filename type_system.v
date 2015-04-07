@@ -195,3 +195,104 @@ Proof.
     + now apply translation_closed_fst, translation_closed.
     + repeat constructor. now apply translation_closed_snd, translation_closed.
 Qed.
+
+Definition cone (l : label) := fun (m : label) => if precedes_dec m l then true else false.
+
+Inductive label_seq : Type :=
+| LabelSeqEmpty
+| LabelSeqCons (l : label) (ls : label_seq).
+
+Fixpoint apply_label_seq (ls : label_seq) (e : prefix) : prefix := match ls with
+| LabelSeqEmpty => e
+| LabelSeqCons l ls => source_calculus.Label (apply_label_seq ls e) l
+end.
+
+Fixpoint lift_label_seq (ls : label_seq) : term := match ls with
+| LabelSeqEmpty => Label bottom
+| LabelSeqCons l ls' => App (App Join (Label l)) (lift_label_seq ls')
+end.
+
+Lemma whatevs v (Hvalue : source_calculus.is_value v) l L :
+  has_type (translation (source_calculus.Label v l)) (pair int L) -> exists L', has_type (translation v) (pair int L').
+Proof.
+  induction v ; simpl ; ainv.
+  - admit.
+  - apply pairs1 in H ; destruct H as [H _]. apply integers in H. ainv.
+  - admit.
+Admitted.
+
+Lemma int_value (v : prefix) l :
+  source_calculus.is_value v -> has_type (translation v) (pair int l) -> exists ls k, v = apply_label_seq ls (source_calculus.Const k).
+Proof.
+  revert l. induction v ; intros ; ainv.
+  - now exists LabelSeqEmpty, k.
+  - simpl in H0 ; apply pairs1 in H0 ; destruct H0. apply integers in H. ainv.
+  - destruct whatevs with (v := v) (l := l) (L := l0) ; auto.
+    edestruct IHv ; auto.
+    + eassumption.
+    + destruct H1 as [k H1]. rewrite H1. now exists (LabelSeqCons l x0), k.
+Qed.
+
+Lemma int_value_translation v ls k :
+  v = apply_label_seq ls (source_calculus.Const k) -> translation v = Pair (Const k) (lift_label_seq ls).
+Proof.
+  revert ls. induction v ; intros ; destruct ls ; ainv.
+  simpl. now erewrite IHv ; auto.
+Qed.
+
+Fixpoint member l ls := match ls with
+| LabelSeqEmpty => false
+| LabelSeqCons l' ls' => if label_eq l l' then true else member l ls'
+end.
+
+Lemma join_label_list ls :
+  exists L, (star (lift_label_seq ls) (Label L)) /\ (forall l, member l ls = true -> precedes l L).
+Proof.
+  induction ls ; simpl.
+  - exists bottom. split.
+    + eauto using star.
+    + inversion 1.
+  - destruct IHls as [L [H0 H1]]. exists (join l L). split.
+    + eapply star_trans.
+       * apply app_star_r. eassumption.
+       * apply star_step, FullStep_step. constructor.
+    + intros. destruct (label_eq l0 l) ; subst ; ainv.
+       * apply semilattice.precedes_join.
+       * apply semilattice.precedes_join3. apply H1, H2.
+Qed.
+
+Lemma label_list_thing ls L :
+  has_type (lift_label_seq ls) (lift_label L) -> forall l, member l ls = true -> precedes l L.
+Proof.
+  destruct (join_label_list ls) as [L' [H1 H2]]. intro Htype.
+  assert (has_type (Label L') (lift_label L)) by eauto using subj_red_star.
+  assert (precedes L' L) by auto using labels2.
+  intros. apply poset.transitivity with (b := L') ; auto.
+Qed.
+
+Lemma filter_list_const L ls k :
+  (forall l, member l ls = true -> precedes l L) ->
+  label_filter (cone L) (apply_label_seq ls (source_calculus.Const k)) = apply_label_seq ls (source_calculus.Const k).
+Proof.
+  intros. induction ls ; simpl.
+  - reflexivity.
+  - assert (precedes l L). { apply H. simpl. destruct (label_eq l l) ; auto. }
+    rewrite IHls.
+    + unfold cone. destruct (precedes_dec l L) ; simpl.
+       * reflexivity.
+       * contradiction.
+    + intros. apply H. simpl. rewrite H1. destruct (label_eq l0 l) ; auto.
+Qed.
+
+Lemma non_interference (e v : source_calculus.prefix) (l : label) :
+  is_term e -> has_type (translation e) (pair int (lift_label l)) -> source_calculus.star e v -> source_calculus.is_value v -> source_calculus.star (label_filter (cone l) e) v.
+Proof.
+  intros. assert (is_term v) by eauto using term_star.
+  apply stability ; try assumption.
+  assert (has_type (translation v) (pair int (lift_label l))) by eauto using source_subj_red_star.
+  assert (exists ls k, v = apply_label_seq ls (source_calculus.Const k)) by eauto using int_value.
+  destruct H5 ; destruct H5. rewrite H5.
+  apply filter_list_const. apply label_list_thing.
+  apply int_value_translation in H5. rewrite H5 in H4.
+  apply pairs1 in H4. destruct H4. apply H6.
+Qed.
