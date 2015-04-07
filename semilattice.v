@@ -14,3 +14,26 @@ Class UpperSemiLattice {A} {precedes} (P : Poset A precedes) (join : A -> A -> A
   bottom_prop : forall a, join bottom a = a;
   order_induction : forall a b, precedes a b <-> join a b = b
 }.
+
+Lemma precedes_join {A} {precedes} {P : Poset A precedes} {join} {bottom} {USL : UpperSemiLattice P join bottom} a b :
+  precedes a (join a b).
+Proof.
+  apply order_induction. rewrite <- join_associative. now rewrite join_idempotent.
+Qed.
+
+Lemma precedes_join2 {A} {precedes} {P : Poset A precedes} {join} {bottom} {USL : UpperSemiLattice P join bottom} a b c :
+  precedes a b -> precedes a (join b c).
+Proof.
+  intros H. assert (join a b = b) as H1 by apply order_induction, H.
+  apply order_induction. rewrite <- join_associative. now rewrite H1.
+Qed.
+
+Lemma precedes_join3 {A} {precedes} {P : Poset A precedes} {join} {bottom} {USL : UpperSemiLattice P join bottom} a b c :
+  precedes a c -> precedes a (join b c).
+Proof.
+  intros. apply order_induction. rewrite <- join_associative.
+  assert (join a b = join b a) as Hab_comm by apply join_commutative.
+  rewrite Hab_comm, join_associative.
+  assert (join a c = c) as Hac_join by apply order_induction, H.
+  now rewrite Hac_join.
+Qed.
