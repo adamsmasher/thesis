@@ -262,6 +262,17 @@ Proof.
   - intros e. destruct e ; asimpl ; auto using prefix_match.
 Qed.
 
+(* The final major result we need before proving prefix monotonicity,
+   and what these substitution lemmas have been leading to, is
+   this match_step result, which shows that we can "lift" a
+   reduction step onto a matching prefix and our lifting will
+   preserve the matching. Effectively this is prefix monotonicity
+   for a single step, rather than a reduction sequence.
+
+   Because the full reduction relation is actually divided between
+   the step and full_step predicates, we need two lemmas to prove
+   this result. *)
+
 Lemma match_step (p1 p2 p1': prefix) :
   p1 ⪯ p2 -> step p1 p1' -> exists p2', step p2 p2' /\ p1' ⪯ p2'.
 Proof.
