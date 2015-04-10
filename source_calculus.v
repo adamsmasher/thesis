@@ -230,6 +230,8 @@ Proof.
   induction 2 ; eauto using term_full_step.
 Qed.
 
+(* it's a useful and trivial result that matching is a relfexive
+   operation - all prefixes match themselves *)
 Lemma match_refl (e : prefix) :
   e ⪯ e.
 Proof.
