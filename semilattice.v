@@ -37,7 +37,8 @@ Lemma precedes_join
   a b :
   precedes a (join a b).
 Proof.
-  apply order_induction. rewrite <- join_associative. now rewrite join_idempotent.
+  apply order_induction.
+  rewrite <- join_associative. now rewrite join_idempotent.
 Qed.
 
 Lemma precedes_join2
@@ -46,8 +47,9 @@ Lemma precedes_join2
   a b c :
   precedes a b -> precedes a (join b c).
 Proof.
-  intros H. assert (join a b = b) as H1 by apply order_induction, H.
-  apply order_induction. rewrite <- join_associative. now rewrite H1.
+  intros H. apply order_induction in H.
+  apply order_induction.
+  rewrite <- join_associative. now rewrite H.
 Qed.
 
 Lemma precedes_join3
@@ -59,6 +61,5 @@ Proof.
   intros. apply order_induction. rewrite <- join_associative.
   assert (join a b = join b a) as Hab_comm by apply join_commutative.
   rewrite Hab_comm, join_associative.
-  assert (join a c = c) as Hac_join by apply order_induction, H.
-  now rewrite Hac_join.
+  apply order_induction in H. now rewrite H.
 Qed.
