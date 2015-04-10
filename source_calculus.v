@@ -1,7 +1,19 @@
-(* based on Pottier and Conchon, Information
-    Flow Inference for Free *)
+
+(* Pottier & Conchon have the luxury of eliding details of
+   substitution, as is standard [cite]. Unfortunately, our mechanized
+   development in Coq cannot afford to do such a thing; thus, our
+   implementations of the calculi use a traditional de Bruijn-style
+   representation for bound variables [cite]. Implementing
+   substitution using this scheme in Coq turns out to be rather
+   burdensome [cite]; to help, we rely on Autosubst [cite], a library
+   developed by Steven Schäfer and Tobias Tebbi designed to ease the
+   process by generating the substitution operation and useful
+   associated lemmas; it also provides various automation tactics to
+   make writing proofs involving substitution easier. *)
 
 Require Import Autosubst.
+
+
 Require Import labels.
 
 Section SourceCalculus.
