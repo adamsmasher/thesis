@@ -210,25 +210,33 @@ Fixpoint lift_label_seq (ls : label_seq) : term := match ls with
 | LabelSeqCons l ls' => App (App Join (Label l)) (lift_label_seq ls')
 end.
 
-Lemma whatevs v (Hvalue : source_calculus.is_value v) l L :
-  has_type (translation (source_calculus.Label v l)) (pair int L) -> exists L', has_type (translation v) (pair int L').
+Lemma int_value_fst (v : prefix) :
+  source_calculus.is_value v -> has_type (eta_fst (translation v)) int -> exists ls k, v = apply_label_seq ls (source_calculus.Const k).
 Proof.
-  induction v ; simpl ; ainv.
-  - admit.
-  - apply pairs1 in H ; destruct H as [H _]. apply integers in H. ainv.
-  - admit.
-Admitted.
+  induction v ; intros ; ainv.
+  - now exists LabelSeqEmpty, k.
+  - simpl in H0. apply integers in H0. ainv.
+  - edestruct IHv.
+    + assumption.
+    + simpl in H0. assumption.
+    + destruct H as [k H]. rewrite H. now exists (LabelSeqCons l x), k.
+Qed.
+
+Lemma int_trans_fst_type (v : prefix) l :
+  source_calculus.is_term v -> source_calculus.is_value v -> has_type (translation v) (pair int l) -> has_type (eta_fst (translation v)) int.
+Proof.
+  intros. edestruct (translation_pair v).
+  - assumption.
+  - destruct H2 as [x [H2 _]] ; ainv.
+  - destruct H2 as [e1 [e2 H2]]. rewrite H2 in *. simpl. apply pairs1 in H1. tauto.
+Qed.
 
 Lemma int_value (v : prefix) l :
-  source_calculus.is_value v -> has_type (translation v) (pair int l) -> exists ls k, v = apply_label_seq ls (source_calculus.Const k).
+  source_calculus.is_term v -> source_calculus.is_value v -> has_type (translation v) (pair int l) -> exists ls k, v = apply_label_seq ls (source_calculus.Const k).
 Proof.
-  revert l. induction v ; intros ; ainv.
-  - now exists LabelSeqEmpty, k.
-  - simpl in H0 ; apply pairs1 in H0 ; destruct H0. apply integers in H. ainv.
-  - destruct whatevs with (v := v) (l := l) (L := l0) ; auto.
-    edestruct IHv ; auto.
-    + eassumption.
-    + destruct H1 as [k H1]. rewrite H1. now exists (LabelSeqCons l x0), k.
+  intros. apply int_value_fst.
+  - assumption.
+  - eapply int_trans_fst_type ; eassumption.
 Qed.
 
 Lemma int_value_translation v ls k :
