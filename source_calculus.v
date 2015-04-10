@@ -210,8 +210,15 @@ Proof.
   intros. subst. apply match_refl.
 Qed.
 
+(* We might think of two substitutions as matching if the terms
+   they substitute in always match. *)
+
+Definition matching_substitutions (sigma sigma' : var -> prefix) :=
+  forall t, sigma t ⪯ sigma' t.
+
 Lemma match_up sigma sigma':
-  (forall t, sigma t ⪯ sigma' t) -> (forall t, up sigma t ⪯ up sigma' t).
+  matching_substitutions sigma sigma' ->
+  matching_substitutions (up sigma) (up sigma').
 Proof.
   intros H t. destruct t ; asimpl.
   - now constructor.
@@ -219,7 +226,7 @@ Proof.
 Qed.
 
 Lemma subst_match2 s s' sigma sigma' :
-  s ⪯ s' -> (forall t, sigma  t ⪯ sigma' t) -> s.[sigma] ⪯ s'.[sigma'].
+  s ⪯ s' -> matching_substitutions sigma sigma' -> s.[sigma] ⪯ s'.[sigma'].
 Proof.
   intros. revert sigma sigma' H0. induction H ; intros.
   - constructor.
