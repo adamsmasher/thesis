@@ -213,7 +213,7 @@ Qed.
 Lemma match_up sigma sigma':
   (forall t, sigma t ⪯ sigma' t) -> (forall t, up sigma t ⪯ up sigma' t).
 Proof.
-  intros. destruct t ; asimpl.
+  intros H t. destruct t ; asimpl.
   - now constructor.
   - apply subst_match, H.
 Qed.
