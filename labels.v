@@ -19,6 +19,6 @@ Parameter precedes_dec : forall l l', {precedes l l'} + {~precedes l l'}.
 Parameter bottom : label.
 Parameter join : label -> label -> label.
 Parameter poset : Poset label precedes.
-Parameter semilattice : UpperSemiLattice poset join bottom.
+Parameter semilattice : UpperSemilattice poset join bottom.
 
 End Labels.
