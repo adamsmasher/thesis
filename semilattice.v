@@ -20,12 +20,15 @@ and Ralf Hinze *)
 
 Require Import poset.
 
-Class UpperSemilattice {A} {precedes} (P : Poset A precedes) (join : A -> A -> A) (bottom : A) := {
-  join_commutative : forall a b, join a b = join b a;
-  join_associative : forall a b c, join (join a b) c = join a (join b c);
-  join_idempotent : forall a, join a a = a;
-  bottom_prop : forall a, join bottom a = a;
-  order_induction : forall a b, precedes a b <-> join a b = b
+Class UpperSemilattice
+  {A} {precedes} (P : Poset A precedes)
+  (join : A -> A -> A) (bottom : A) := {
+    join_commutative : forall a b, join a b = join b a;
+    join_associative : forall a b c,
+      join (join a b) c = join a (join b c);
+    join_idempotent : forall a, join a a = a;
+    bottom_prop : forall a, join bottom a = a;
+    order_induction : forall a b, precedes a b <-> join a b = b
 }.
 
 Lemma precedes_join {A} {precedes} {P : Poset A precedes} {join} {bottom} {USL : UpperSemilattice P join bottom} a b :
