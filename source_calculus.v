@@ -143,6 +143,14 @@ Inductive full_step : prefix -> prefix -> Prop :=
 
 Notation "s → t" := (full_step s t) (at level 70).
 
+(* We define a standard transitive reflexive closure over
+   full reduction *)
+
+Inductive star : prefix -> prefix -> Prop :=
+| StarR p : star p p
+| StarC x y z : x → y -> star y z -> star x z.
+Notation "s →* t" := (star s t) (at level 70).
+
 Definition term_subst sigma := forall (x : var), is_term (sigma x).
 
 Lemma ren_term s r :
@@ -194,11 +202,6 @@ Proof.
   - constructor ; auto.
   - constructor ; auto.
 Qed.
-
-Inductive star : prefix -> prefix -> Prop :=
-| StarR p : star p p
-| StarC x y z : x → y -> star y z -> star x z.
-Notation "s →* t" := (star s t) (at level 70).
 
 Lemma term_star e f :
   is_term e -> star e f -> is_term f.
