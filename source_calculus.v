@@ -81,6 +81,18 @@ Inductive n_closed (n : nat) : prefix -> Prop :=
 
 Definition is_closed := n_closed 0.
 
+(* One of the biggest differences between our implementation of
+   Pottier & Conchon's method and the original paper is our
+   treatment of evaluation contexts. Whereas Potter & Conchon
+   introduce a context rule that allows the evaluation relation
+   to be, in a sense, parametric over different evaluation strategies
+   (notably call-by-name, call-by-value, and full reduction), we
+   instead define a base evaluation relation and then embed it
+   inside the proper evaluation strategies *)
+
+(* The only rule in our base evaluation relation that's non-standard
+   is the "lift" rule. TODO: etc *)
+
 Inductive step : prefix -> prefix -> Prop :=
 | Step_beta (s t : prefix) :
    step (App (Abs s) t) s.[t/]
@@ -89,15 +101,23 @@ Inductive step : prefix -> prefix -> Prop :=
 | Step_lift (s t : prefix) (l : label) :
    step (App (Label s l) t) (Label (App s t) l).
 
+(* Our definition of call-by-need is standard; it is taken directly
+   from section 6.1 of the Pottier & Conchon paper *)
+
 Inductive cbn : prefix -> prefix -> Prop :=
 | CBN_step s t : step s t -> cbn s t
 | CBN_app s s' t : cbn s s' -> cbn (App s t) (App s' t)
 | CBN_label s s' l : cbn s s' -> cbn (Label s l) (Label s' l).
 
+(* The definition of values in our calculus is again standard
+   and taken from section 6.1 *)
+
 Inductive is_value : prefix -> Prop :=
 | Value_const k : is_value (Const k)
 | Value_abs e : is_value (Abs e)
 | Value_label l v : is_value v -> is_value (Label v l).
+
+(* Full reduction is standard *)
 
 Inductive full_step : prefix -> prefix -> Prop :=
 | FullStep_step (s t : prefix) :
@@ -114,6 +134,13 @@ Inductive full_step : prefix -> prefix -> Prop :=
    full_step t t' -> full_step (Let s t) (Let s t')
 | FullStep_label (s t : prefix) (l : label) :
    full_step s t -> full_step (Label s l) (Label t l).
+
+(* We use a →-notation for full reduction, as most of the
+   lemmas and theorems we prove in this section are for full
+   reduction. This means that our lemmas appear in Coq to match
+   the notation used in the original Pottier & Conchon paper
+   (clarified in private correspondance with the author). *)
+
 Notation "s → t" := (full_step s t) (at level 70).
 
 Definition term_subst sigma := forall (x : var), is_term (sigma x).
