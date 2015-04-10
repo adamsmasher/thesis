@@ -251,11 +251,14 @@ Proof.
   - constructor ; auto.
 Qed.
 
-Lemma subst_match2' s s' t t' :
+(* The following is a simple corollary of subst_match2,
+   restricted to single term substitutions *)
+
+Corollary subst_match2' s s' t t' :
   s ⪯ s' -> t ⪯ t' -> s.[t/] ⪯ s'.[t'/].
 Proof.
   intros. apply subst_match2.
-  - exact H.
+  - assumption.
   - intros e. destruct e ; asimpl ; auto using prefix_match.
 Qed.
 
