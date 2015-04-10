@@ -13,10 +13,26 @@
 
 Require Import Autosubst.
 
-
 Require Import labels.
 
 Section SourceCalculus.
+
+(* Our source calculus is a standard lambda calculus with labels.
+   What follows is a definition of *prefixes*, not terms -
+   a prefix is a term that optionally may have a "hole", a "missing
+   subexpression"; to put it another way, terms are the subset of
+   prefixes containing no holes. *)
+
+(* The original paper defines prefixes as an extension of the set of
+   terms. As Coq doesn't provide any means of extending inductive
+   type definitions, we instead use one general prefix type and rely
+   on an is_term predicate to restrict the scope of lemmas when
+   necessary. This avoids definitional duplication (even if the
+   is_term definition strongly resembles the prefix definition) and
+   ensures lemmas are as general as possible. *)
+
+(* Note the use of the {bind prefix} type. This is how we notfy
+   Autosubst that the given term binds a variable. *)
 
 Inductive prefix : Type :=
 | Hole
@@ -27,11 +43,16 @@ Inductive prefix : Type :=
 | Let (s : prefix) (t : {bind prefix})
 | Label (s : prefix) (l : label).
 
+(* Here we use Autosubst to automatically generate the substitution
+   operation and lemmas for our type *)
+
 Instance Ids_prefix : Ids prefix. derive. Defined.
 Instance Rename_prefix : Rename prefix. derive. Defined.
 Instance Subst_prefix : Subst prefix. derive. Defined.
 Instance SubstLemmas_prefix : SubstLemmas prefix. derive. Defined.
 
+(* Here we define a predicate that indicates if a prefix is a term,
+   i.e. has no holes *)
 Inductive is_term : prefix -> Prop :=
 | ConstTerm k : is_term (Const k)
 | VarTerm x : is_term (Var x)
