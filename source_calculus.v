@@ -151,6 +151,27 @@ Inductive star : prefix -> prefix -> Prop :=
 | StarC x y z : x → y -> star y z -> star x z.
 Notation "s →* t" := (star s t) (at level 70).
 
+(* A prefix "matches" another prefix if it is the
+   same except for some subexpressions possibly replaced by
+   holes. *)
+
+Inductive prefix_match : prefix -> prefix -> Prop :=
+| HoleMatch p : prefix_match Hole p
+| ConstMatch k1 k2 : k1 = k2 -> prefix_match (Const k1) (Const k2)
+| VarMatch x1 x2 : x1 = x2 -> prefix_match (Var x1) (Var x2)
+| AbsMatch s1 s2 :
+    prefix_match s1 s2 -> prefix_match (Abs s1) (Abs s2)
+| AppMatch s1 t1 s2 t2 :
+    prefix_match s1 s2 -> prefix_match t1 t2 ->
+    prefix_match (App s1 t1) (App s2 t2)
+| LetMatch s1 t1 s2 t2 :
+    prefix_match s1 s2 -> prefix_match t1 t2 ->
+    prefix_match (Let s1 t1) (Let s2 t2)
+| LabelMatch s1 l1 s2 l2 :
+  l1 = l2 -> prefix_match s1 s2 ->
+  prefix_match (Label s1 l1) (Label s2 l2).
+Notation "s ⪯ t" := (prefix_match s t) (at level 70).
+
 Definition term_subst sigma := forall (x : var), is_term (sigma x).
 
 Lemma ren_term s r :
@@ -208,16 +229,6 @@ Lemma term_star e f :
 Proof.
   induction 2 ; eauto using term_full_step.
 Qed.
-
-Inductive prefix_match : prefix -> prefix -> Prop :=
-| HoleMatch p : prefix_match Hole p
-| ConstMatch k1 k2 : k1 = k2 -> prefix_match (Const k1) (Const k2)
-| VarMatch x1 x2 : x1 = x2 -> prefix_match (Var x1) (Var x2)
-| AbsMatch s1 s2 : prefix_match s1 s2 -> prefix_match (Abs s1) (Abs s2)
-| AppMatch s1 t1 s2 t2 : prefix_match s1 s2 -> prefix_match t1 t2 -> prefix_match (App s1 t1) (App s2 t2)
-| LetMatch s1 t1 s2 t2 : prefix_match s1 s2 -> prefix_match t1 t2 -> prefix_match (Let s1 t1) (Let s2 t2)
-| LabelMatch s1 l1 s2 l2 : l1 = l2 -> prefix_match s1 s2 -> prefix_match (Label s1 l1) (Label s2 l2).
-Notation "s ⪯ t" := (prefix_match s t) (at level 70).
 
 Lemma match_refl (e : prefix) :
   e ⪯ e.
