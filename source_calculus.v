@@ -304,10 +304,10 @@ Qed.
 Lemma prefix_monotonicity (e e' f : prefix) :
   e ⪯ e' -> is_term f -> e →* f -> e' →* f.
 Proof.
-  intros. revert e' H. induction H1 as [e|e x f] ; intros.
-  - rewrite (term_match e e') ; try constructor ; assumption.
-  - destruct (match_fullstep e e' x) as [x' [H3 H4]] ; try assumption. assert (x' →* f) by auto.
-    apply (StarC e' x' f) ; assumption.
+  intros H H0 H1. revert e' H. induction H1 as [e|e x f] ; intros.
+  - rewrite (term_match e e') ; eauto using star.
+  - destruct (match_fullstep e e' x) as [x' [H3 H4]] ; auto.
+    eauto using star.
 Qed.
 
 
