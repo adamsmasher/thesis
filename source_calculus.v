@@ -172,64 +172,6 @@ Inductive prefix_match : prefix -> prefix -> Prop :=
   prefix_match (Label s1 l1) (Label s2 l2).
 Notation "s ⪯ t" := (prefix_match s t) (at level 70).
 
-Definition term_subst sigma := forall (x : var), is_term (sigma x).
-
-Lemma ren_term s r :
-  is_term s -> is_term s.[ren r].
-Proof.
-  revert r. induction s ; intros ; asimpl ; ainv ; constructor ; auto.
-Qed.
-
-Lemma up_term_subst sigma :
-  term_subst sigma -> term_subst (up sigma).
-Proof.
-  intros. intro x. destruct x ; asimpl.
-  - constructor.
-  - apply ren_term, H.
-Qed.
-
-Lemma term_repl s sigma :
-  is_term s -> term_subst sigma -> is_term s.[sigma].
-Proof.
-  revert sigma. induction s ; intros ; simpl ; ainv ; auto using is_term, up_term_subst.
-Qed.
-
-Lemma scons_term_subst t :
-  is_term t -> term_subst (t .: ids).
-Proof.
-  intros. intro x. destruct x ; simpl.
-  - assumption.
-  - constructor.
-Qed.
-
-Lemma term_step e f :
-  is_term e -> step e f -> is_term f.
-Proof.
-  induction 2 ; ainv.
-  - apply term_repl ; auto using scons_term_subst.
-  - apply term_repl ; auto using scons_term_subst.
-  - repeat constructor ; auto.
-Qed.
-
-Lemma term_full_step e f :
-  is_term e -> full_step e f -> is_term f.
-Proof.
-  induction 2 ; ainv.
-  - eapply term_step ; eauto.
-  - constructor. now apply IHfull_step.
-  - constructor ; auto.
-  - constructor ; auto.
-  - constructor ; auto.
-  - constructor ; auto.
-  - constructor ; auto.
-Qed.
-
-Lemma term_star e f :
-  is_term e -> star e f -> is_term f.
-Proof.
-  induction 2 ; eauto using term_full_step.
-Qed.
-
 (* it's a useful and trivial result that matching is a relfexive
    operation - all prefixes match themselves *)
 Lemma match_refl (e : prefix) :
@@ -238,18 +180,6 @@ Proof.
   induction e ; now constructor.
 Qed.
 
-Lemma match_trans (e1 e2 e3 : prefix) :
-  e1 ⪯ e2 -> e2 ⪯ e3 -> e1 ⪯ e3.
-Proof.
-  intros. revert e3 H0. induction H ; intros.
-  - constructor.
-  - now subst.
-  - now subst.
-  - inversion H0 ; subst. constructor. apply IHprefix_match. exact H2.
-  - inversion H1 ; subst. constructor ; auto.
-  - inversion H1 ; subst. constructor ; auto.
-  - inversion H1 ; subst. constructor ; auto.
-Qed.
 
 Lemma term_match (p1 p2 : prefix) :
   is_term p1 -> p1 ⪯ p2 -> p1 = p2.
@@ -336,6 +266,83 @@ Proof.
   - destruct (match_fullstep e e' x) as [x' [H3 H4]] ; try assumption. assert (x' →* f) by auto.
     apply (StarC e' x' f) ; assumption.
 Qed.
+
+
+Definition term_subst sigma := forall (x : var), is_term (sigma x).
+
+Lemma ren_term s r :
+  is_term s -> is_term s.[ren r].
+Proof.
+  revert r. induction s ; intros ; asimpl ; ainv ; constructor ; auto.
+Qed.
+
+Lemma up_term_subst sigma :
+  term_subst sigma -> term_subst (up sigma).
+Proof.
+  intros. intro x. destruct x ; asimpl.
+  - constructor.
+  - apply ren_term, H.
+Qed.
+
+Lemma term_repl s sigma :
+  is_term s -> term_subst sigma -> is_term s.[sigma].
+Proof.
+  revert sigma. induction s ; intros ; simpl ; ainv ; auto using is_term, up_term_subst.
+Qed.
+
+Lemma scons_term_subst t :
+  is_term t -> term_subst (t .: ids).
+Proof.
+  intros. intro x. destruct x ; simpl.
+  - assumption.
+  - constructor.
+Qed.
+
+Lemma term_step e f :
+  is_term e -> step e f -> is_term f.
+Proof.
+  induction 2 ; ainv.
+  - apply term_repl ; auto using scons_term_subst.
+  - apply term_repl ; auto using scons_term_subst.
+  - repeat constructor ; auto.
+Qed.
+
+Lemma term_full_step e f :
+  is_term e -> full_step e f -> is_term f.
+Proof.
+  induction 2 ; ainv.
+  - eapply term_step ; eauto.
+  - constructor. now apply IHfull_step.
+  - constructor ; auto.
+  - constructor ; auto.
+  - constructor ; auto.
+  - constructor ; auto.
+  - constructor ; auto.
+Qed.
+
+Lemma term_star e f :
+  is_term e -> star e f -> is_term f.
+Proof.
+  induction 2 ; eauto using term_full_step.
+Qed.
+
+
+
+Lemma match_trans (e1 e2 e3 : prefix) :
+  e1 ⪯ e2 -> e2 ⪯ e3 -> e1 ⪯ e3.
+Proof.
+  intros. revert e3 H0. induction H ; intros.
+  - constructor.
+  - now subst.
+  - now subst.
+  - inversion H0 ; subst. constructor. apply IHprefix_match. exact H2.
+  - inversion H1 ; subst. constructor ; auto.
+  - inversion H1 ; subst. constructor ; auto.
+  - inversion H1 ; subst. constructor ; auto.
+Qed.
+
+
+
 
 Definition label_filter (p : label -> bool) :=
   fix f (e : prefix) := match e with
