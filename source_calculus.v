@@ -180,6 +180,16 @@ Proof.
   induction e ; now constructor.
 Qed.
 
+(* Following the original paper, the first lemma we're interested
+   in showing about our source calculus is "prefix monotonicty",
+   which states that reduction sequences are preserved even
+   if we replace holes with valid subexpressions. Prefix
+   monotonicity is necessary to show the key theorem about our
+   source calculus, stability.
+
+   The paper provides no proof for prefix monotonicity. We first
+   rely on a simple lemma that states that a term (i.e. a prefix
+   with no holes) matches only itself. *)
 
 Lemma term_match (p1 p2 : prefix) :
   is_term p1 -> p1 ⪯ p2 -> p1 = p2.
