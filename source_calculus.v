@@ -198,6 +198,11 @@ Proof.
   induction 2 ; ainv ; now autorew.
 Qed.
 
+(* Next, we need to prove a series of rather technical lemmas
+   related to substitution. The first states that
+   any substitution will preserve matchings, which makes intuitive
+   sense. *)
+
 Lemma subst_match e e' sigma :
   e ⪯ e' -> e.[sigma] ⪯ e'.[sigma].
 Proof.
