@@ -189,19 +189,13 @@ Qed.
 
    The paper provides no proof for prefix monotonicity. We first
    rely on a simple lemma that states that a term (i.e. a prefix
-   with no holes) matches only itself. *)
+   with no holes) matches only itself, a fact that falls quite
+   trivially out of the induction. *)
 
 Lemma term_match (p1 p2 : prefix) :
   is_term p1 -> p1 ⪯ p2 -> p1 = p2.
 Proof.
-  intros. induction H0.
-  - inversion H.
-  - now subst.
-  - now subst.
-  - inversion H. now rewrite IHprefix_match.
-  - inversion H. now rewrite IHprefix_match1, IHprefix_match2.
-  - inversion H. now rewrite IHprefix_match1, IHprefix_match2.
-  - inversion H. subst. now rewrite IHprefix_match.
+  induction 2 ; ainv ; now autorew.
 Qed.
 
 Lemma subst_match e e' sigma :
