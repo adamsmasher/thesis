@@ -206,7 +206,7 @@ Qed.
 Lemma subst_match e e' sigma :
   e ⪯ e' -> e.[sigma] ⪯ e'.[sigma].
 Proof.
-  intros. revert sigma. induction H ; try now constructor.
+  intro H. revert sigma. induction H ; try now constructor.
   intros. subst. apply match_refl.
 Qed.
 
