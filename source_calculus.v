@@ -265,10 +265,10 @@ Qed.
 Lemma match_step (p1 p2 p1': prefix) :
   p1 ⪯ p2 -> step p1 p1' -> exists p2', step p2 p2' /\ p1' ⪯ p2'.
 Proof.
-  intros. revert p2 H. induction H0 ; intros ; inversion H ; subst.
-  - inversion H2 ; subst. exists s0.[t2/]. auto using step, subst_match2'.
-  - exists t2.[s2/]. auto using step, subst_match2'.
-  - inversion H2 ; subst. exists (Label (App s0 t2) l2). auto using step, prefix_match.
+  intros. revert p2 H. induction H0 ; intros ; ainv.
+  - exists s0.[t2/] ; auto using step, subst_match2'.
+  - exists t2.[s2/] ; auto using step, subst_match2'.
+  - exists (Label (App s0 t2) l2) ; auto using step, prefix_match.
 Qed.
 
 Lemma match_fullstep (p1 p2 p1': prefix) :
