@@ -274,20 +274,20 @@ Qed.
 Lemma match_fullstep (p1 p2 p1': prefix) :
   p1 ⪯ p2 -> p1 → p1' -> exists p2', p2 → p2' /\ p1' ⪯ p2'.
 Proof.
-  intros. revert p2 H. induction H0 ; intros.
-  - destruct (match_step s p2 t) as [p2' []] ; auto. exists p2'. auto using full_step.
-  - inversion H ; subst. destruct (IHfull_step s2) as [s2' []] ; auto.
-    exists (Abs s2'). auto using full_step, prefix_match.
-  - inversion H ; subst. destruct (IHfull_step s2) as [s2' []] ; auto.
-    exists (App s2' t2). auto using full_step, prefix_match.
-  - inversion H ; subst. destruct (IHfull_step t2) as [t2' []] ; auto.
-    exists (App s2 t2'). auto using full_step, prefix_match.
-  - inversion H ; subst. destruct (IHfull_step s2) as [s2' []] ; auto.
-    exists (Let s2' t2). auto using full_step, prefix_match.
-  - inversion H ; subst. destruct (IHfull_step t2) as [t2' []] ; auto.
-    exists (Let s2 t2'). auto using full_step, prefix_match.
-  - inversion H ; subst. destruct (IHfull_step s2) as [s2' []] ; auto.
-    exists (Label s2' l2). auto using full_step, prefix_match.
+  intros. revert p2 H. induction H0 ; intros ; ainv.
+  - destruct (match_step s p2 t) as [p2' []] ; auto. exists p2' ; auto using full_step.
+  - destruct (IHfull_step s2) as [s2' []] ; auto.
+    exists (Abs s2') ; auto using full_step, prefix_match.
+  - destruct (IHfull_step s2) as [s2' []] ; auto.
+    exists (App s2' t2) ; auto using full_step, prefix_match.
+  - destruct (IHfull_step t2) as [t2' []] ; auto.
+    exists (App s2 t2') ; auto using full_step, prefix_match.
+  - destruct (IHfull_step s2) as [s2' []] ; auto.
+    exists (Let s2' t2) ; auto using full_step, prefix_match.
+  - destruct (IHfull_step t2) as [t2' []] ; auto.
+    exists (Let s2 t2') ; auto using full_step, prefix_match.
+  - destruct (IHfull_step s2) as [s2' []] ; auto.
+    exists (Label s2' l2) ; auto using full_step, prefix_match.
 Qed.
 
 Lemma prefix_monotonicity (e e' f : prefix) :
