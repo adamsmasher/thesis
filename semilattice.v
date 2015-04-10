@@ -1,9 +1,22 @@
+(* A typeclass representing an upper semilattice. A small number
+   of useful lemmas are proven that we end up using in
+   type_system.v to show non-interference *)
+
+(* See poset.v for more discussion around typeclasses and what
+   we use them for. *)
+
+(* TODO: move these citations to poset.v? *)
+
 (* lattice stuff influenced by A reflection-based
 proof tactic for lattices in Coq by Daniel James
 and Ralf Hinze *)
 
 (* also: A Gentle Introducton to Type Classes and
     Relations in Coq by Pierre Casteran *)
+
+
+
+(* An upper semilattice is a poset with additional properties *)
 
 Require Import poset.
 
