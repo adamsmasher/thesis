@@ -230,16 +230,24 @@ Proof.
   - apply subst_match, H.
 Qed.
 
+(* subst_match tells us that if two prefixes match, we can
+   apply a single substitution to them and the result will match;
+   subst_match2 strengthens this: we can, in fact, apply two
+   *different* substitutions, as long as the first matches the
+   second, and preserve the matching *)
+
 Lemma subst_match2 s s' sigma sigma' :
-  s ⪯ s' -> matching_substitutions sigma sigma' -> s.[sigma] ⪯ s'.[sigma'].
+  s ⪯ s' ->
+  matching_substitutions sigma sigma' ->
+  s.[sigma] ⪯ s'.[sigma'].
 Proof.
-  intros. revert sigma sigma' H0. induction H ; intros.
+  intros H. revert sigma sigma'. induction H ; intros ; simpl.
   - constructor.
   - now constructor.
-  - destruct x2 ; subst ; asimpl ; apply H0.
-  - asimpl. constructor. apply IHprefix_match. intros. apply match_up. apply H0.
+  - subst. apply H0.
+  - constructor. apply IHprefix_match. now apply match_up.
   - constructor ; auto.
-  - constructor ; auto. apply IHprefix_match2. intros t. apply match_up. apply H1.
+  - constructor ; auto. apply IHprefix_match2. now apply match_up.
   - constructor ; auto.
 Qed.
 
