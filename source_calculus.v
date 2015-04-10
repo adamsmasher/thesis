@@ -61,6 +61,16 @@ Inductive is_term : prefix -> Prop :=
 | LetTerm s t : is_term s -> is_term t -> is_term (Let s t)
 | LabelTerm s l : is_term s -> is_term (Label s l).
 
+(* The paper defines the typing relation solely over closed terms;
+   thus, we need a way to talk about closedness. The following
+   approach is taken from [Semantics course notes]; a term is
+   n_closed n if all free variables in it are less than n. An
+   n_closed 0 term is thus fully closed, as all free variables
+   are less than 0 (i.e. do not exist). This approach is often
+   necessary, rather than defining is_closed directly, to exploit
+   induction over terms (as the subterm of a closed term may not
+   be fully closed, i.e. s in Abs s). *)
+
 Inductive n_closed (n : nat) : prefix -> Prop :=
 | ConstClosed k : n_closed n (Const k)
 | VarClosed x : x < n -> n_closed n (Var x)
