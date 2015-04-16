@@ -382,6 +382,15 @@ Qed.
    autosubst tactic, to help make proofs using it go smoothly *)
 Hint Rewrite @ren_filter : autosubst.
 
+(* This lemma's rather technical result is probably easier to read
+   formally rather than described informally. The key thing to note
+   is that sigma >>> label_filter p is a substitution that is, in a
+   sense, the filtering of sigma: the sigma substitution is
+   performed, but each term that is substituted in is filtered
+   first
+
+   This lemma is necessary for a series of lemmas that follow which
+   roughly corresponding to Lemma 3.2 in the paper. *)
 Lemma filter_subst p e sigma:
   (⌊ e ⌋p).[sigma >>> label_filter p] = ⌊ e.[sigma] ⌋p.
 Proof.
