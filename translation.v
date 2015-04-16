@@ -1,3 +1,8 @@
+(* This file is where we introduce the translation mechanism used
+   to convert between the labelled source calculus and the
+   unlabelled target calculus; we also prove a key correctness
+   property of it, the simulation property. *)
+
 Require Import source_calculus.
 Require Import target_calculus.
 Require Import labels.
