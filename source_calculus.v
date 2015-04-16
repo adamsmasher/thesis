@@ -100,22 +100,6 @@ Inductive step : prefix -> prefix -> Prop :=
 | Step_lift (s t : prefix) (l : label) :
    step (App (Label s l) t) (Label (App s t) l).
 
-(* Our definition of call-by-need is standard; it is taken directly
-   from section 6.1 of the Pottier & Conchon paper *)
-
-Inductive cbn : prefix -> prefix -> Prop :=
-| CBN_step s t : step s t -> cbn s t
-| CBN_app s s' t : cbn s s' -> cbn (App s t) (App s' t)
-| CBN_label s s' l : cbn s s' -> cbn (Label s l) (Label s' l).
-
-(* The definition of values in our calculus is again standard
-   and taken from section 6.1 *)
-
-Inductive is_value : prefix -> Prop :=
-| Value_const k : is_value (Const k)
-| Value_abs e : is_value (Abs e)
-| Value_label l v : is_value v -> is_value (Label v l).
-
 (* Full reduction is standard *)
 
 Inductive full_step : prefix -> prefix -> Prop :=
@@ -531,6 +515,23 @@ Inductive n_closed (n : nat) : prefix -> Prop :=
 | LabelClosed s l : n_closed n s -> n_closed n (Label s l).
 
 Definition is_closed := n_closed 0.
+
+
+(* Our definition of call-by-need is standard; it is taken directly
+   from section 6.1 of the Pottier & Conchon paper *)
+
+Inductive cbn : prefix -> prefix -> Prop :=
+| CBN_step s t : step s t -> cbn s t
+| CBN_app s s' t : cbn s s' -> cbn (App s t) (App s' t)
+| CBN_label s s' l : cbn s s' -> cbn (Label s l) (Label s' l).
+
+(* The definition of values in our calculus is again standard
+   and taken from section 6.1 *)
+
+Inductive is_value : prefix -> Prop :=
+| Value_const k : is_value (Const k)
+| Value_abs e : is_value (Abs e)
+| Value_label l v : is_value v -> is_value (Label v l).
 
 Lemma match_trans (e1 e2 e3 : prefix) :
   e1 ⪯ e2 -> e2 ⪯ e3 -> e1 ⪯ e3.
