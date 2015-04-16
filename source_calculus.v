@@ -334,82 +334,6 @@ Proof.
     eauto using star.
 Qed.
 
-
-Definition term_subst sigma := forall (x : var), is_term (sigma x).
-
-Lemma ren_term s r :
-  is_term s -> is_term s.[ren r].
-Proof.
-  revert r. induction s ; intros ; asimpl ; ainv ; constructor ; auto.
-Qed.
-
-Lemma up_term_subst sigma :
-  term_subst sigma -> term_subst (up sigma).
-Proof.
-  intros. intro x. destruct x ; asimpl.
-  - constructor.
-  - apply ren_term, H.
-Qed.
-
-Lemma term_repl s sigma :
-  is_term s -> term_subst sigma -> is_term s.[sigma].
-Proof.
-  revert sigma. induction s ; intros ; simpl ; ainv ; auto using is_term, up_term_subst.
-Qed.
-
-Lemma scons_term_subst t :
-  is_term t -> term_subst (t .: ids).
-Proof.
-  intros. intro x. destruct x ; simpl.
-  - assumption.
-  - constructor.
-Qed.
-
-Lemma term_step e f :
-  is_term e -> step e f -> is_term f.
-Proof.
-  induction 2 ; ainv.
-  - apply term_repl ; auto using scons_term_subst.
-  - apply term_repl ; auto using scons_term_subst.
-  - repeat constructor ; auto.
-Qed.
-
-Lemma term_full_step e f :
-  is_term e -> full_step e f -> is_term f.
-Proof.
-  induction 2 ; ainv.
-  - eapply term_step ; eauto.
-  - constructor. now apply IHfull_step.
-  - constructor ; auto.
-  - constructor ; auto.
-  - constructor ; auto.
-  - constructor ; auto.
-  - constructor ; auto.
-Qed.
-
-Lemma term_star e f :
-  is_term e -> star e f -> is_term f.
-Proof.
-  induction 2 ; eauto using term_full_step.
-Qed.
-
-
-
-Lemma match_trans (e1 e2 e3 : prefix) :
-  e1 ⪯ e2 -> e2 ⪯ e3 -> e1 ⪯ e3.
-Proof.
-  intros. revert e3 H0. induction H ; intros.
-  - constructor.
-  - now subst.
-  - now subst.
-  - inversion H0 ; subst. constructor. apply IHprefix_match. exact H2.
-  - inversion H1 ; subst. constructor ; auto.
-  - inversion H1 ; subst. constructor ; auto.
-  - inversion H1 ; subst. constructor ; auto.
-Qed.
-
-
-
 (* Following the original paper, the primary result we want to prove
    for the source calculus is stability, which roughly states that
    the labels contained in the result of a reduction sequence are the
@@ -519,6 +443,80 @@ Proof.
   - destruct (filter_fullstep H0 p).
     + econstructor ; eauto.
     + eapply prefix_monotonicity ; eauto.
+Qed.
+
+
+Definition term_subst sigma := forall (x : var), is_term (sigma x).
+
+Lemma ren_term s r :
+  is_term s -> is_term s.[ren r].
+Proof.
+  revert r. induction s ; intros ; asimpl ; ainv ; constructor ; auto.
+Qed.
+
+Lemma up_term_subst sigma :
+  term_subst sigma -> term_subst (up sigma).
+Proof.
+  intros. intro x. destruct x ; asimpl.
+  - constructor.
+  - apply ren_term, H.
+Qed.
+
+Lemma term_repl s sigma :
+  is_term s -> term_subst sigma -> is_term s.[sigma].
+Proof.
+  revert sigma. induction s ; intros ; simpl ; ainv ; auto using is_term, up_term_subst.
+Qed.
+
+Lemma scons_term_subst t :
+  is_term t -> term_subst (t .: ids).
+Proof.
+  intros. intro x. destruct x ; simpl.
+  - assumption.
+  - constructor.
+Qed.
+
+Lemma term_step e f :
+  is_term e -> step e f -> is_term f.
+Proof.
+  induction 2 ; ainv.
+  - apply term_repl ; auto using scons_term_subst.
+  - apply term_repl ; auto using scons_term_subst.
+  - repeat constructor ; auto.
+Qed.
+
+Lemma term_full_step e f :
+  is_term e -> full_step e f -> is_term f.
+Proof.
+  induction 2 ; ainv.
+  - eapply term_step ; eauto.
+  - constructor. now apply IHfull_step.
+  - constructor ; auto.
+  - constructor ; auto.
+  - constructor ; auto.
+  - constructor ; auto.
+  - constructor ; auto.
+Qed.
+
+Lemma term_star e f :
+  is_term e -> star e f -> is_term f.
+Proof.
+  induction 2 ; eauto using term_full_step.
+Qed.
+
+
+
+Lemma match_trans (e1 e2 e3 : prefix) :
+  e1 ⪯ e2 -> e2 ⪯ e3 -> e1 ⪯ e3.
+Proof.
+  intros. revert e3 H0. induction H ; intros.
+  - constructor.
+  - now subst.
+  - now subst.
+  - inversion H0 ; subst. constructor. apply IHprefix_match. exact H2.
+  - inversion H1 ; subst. constructor ; auto.
+  - inversion H1 ; subst. constructor ; auto.
+  - inversion H1 ; subst. constructor ; auto.
 Qed.
 
 End SourceCalculus.
