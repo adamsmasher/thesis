@@ -205,8 +205,8 @@ Qed.
    in showing about our source calculus is "prefix monotonicty",
    which states that reduction sequences are preserved even
    if we replace holes with valid subexpressions. Prefix
-   monotonicity is necessary to show the key theorem about our
-   source calculus, stability.
+   monotonicity will be necessary to show the key theorem about our
+   source calculus, stability (described shortly).
 
    The paper provides no proof for prefix monotonicity. We first
    rely on a simple lemma that states that a term (i.e. a prefix
