@@ -19,6 +19,11 @@ Inductive term : Type :=
 | Label (l : label)
 | Join.
 
+(* We introduce some notation, matching the paper, to make it
+   easier to write out term level joins *)
+
+Notation "l @ m" := (App (App Join l) m) (at level 70).
+
 Inductive isValue : term -> Prop :=
 | const_value k : isValue (Const k)
 | abs_value s : isValue (Abs s)
@@ -37,7 +42,6 @@ Inductive is_subexpr : term -> term -> Prop :=
 | Sub_pair_r s t : is_subexpr t (Pair s t)
 | Sub_trans s t u : is_subexpr s t -> is_subexpr t u -> is_subexpr s u.
 
-Notation "l @ m" := (App (App Join l) m) (at level 70).
 
 Instance Ids_term : Ids term. derive. Defined.
 Instance Rename_term : Rename term. derive. Defined.
