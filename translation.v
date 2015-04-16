@@ -51,6 +51,8 @@ Fixpoint translation (e : source_calculus.prefix) : target_calculus.term :=
       (eta_fst (translation e))
       ((Label l) @ (eta_snd (translation e)))
   end.
+Notation "⦇ e ⦈" := (translation e).
+
 
 Lemma translation_pair e :
   is_term e -> (exists x, e = source_calculus.Var x /\ translation e = Var x) \/ (exists e1 e2, translation e = Pair e1 e2).
@@ -139,7 +141,6 @@ Inductive eta_eq : term -> term -> Prop :=
 | EtaEqLet s s' t t' : eta_eq s s' -> eta_eq t t' -> eta_eq (Let s t) (Let s' t')
 | EtaEqPair s s' t t' : eta_eq s s' -> eta_eq t t' -> eta_eq (Pair s t) (Pair s' t').
 
-Notation "⦇ e ⦈" := (translation e).
 
 
 
