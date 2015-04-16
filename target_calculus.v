@@ -55,7 +55,99 @@ Inductive step : term -> term -> Prop :=
 | Step_neutral s :
    step ((Label bottom) @ s) s.
 
-Inductive isValue : term -> Prop :=
+Inductive full_step : term -> term -> Prop :=
+| FullStep_step s t :
+   step s t -> full_step s t
+| FullStep_abs s t :
+   full_step s t -> full_step (Abs s) (Abs t)
+| FullStep_app_l s s' t :
+   full_step s s' -> full_step (App s t) (App s' t)
+| FullStep_app_r s t t' :
+   full_step t t' -> full_step (App s t) (App s t')
+| FullStep_let_l s s' t :
+   full_step s s' -> full_step (Let s t) (Let s' t)
+| FullStep_let_r s t t' :
+   full_step t t' -> full_step (Let s t) (Let s t')
+| FullStep_pair_l s s' t :
+   full_step s s' -> full_step (Pair s t) (Pair s' t)
+| FullStep_pair_r s t t':
+   full_step t t' -> full_step (Pair s t) (Pair s t').
+
+Notation "s → t" := (full_step s t) (at level 70).
+
+(* As per usual, we define a reflexive, transitive closure for the
+   full step relation *)
+
+Inductive star : term -> term -> Prop :=
+| StarR p : star p p
+| StarC x y z : x → y -> star y z -> star x z.
+Notation "s →* t" := (star s t) (at level 70).
+
+Lemma star_trans s t u :
+  s →* t -> t →* u -> s →* u.
+Proof.
+  intros. induction H ; intros ; simpl.
+  - assumption.
+  - eapply StarC.
+    + eassumption.
+    + apply IHstar. assumption.
+Qed.
+
+(* The paper doesn't prove any lemmas about the target calculus;
+   the following lemmas are simply for convenience when working with
+   it. *)
+
+
+(* steps can be lifted into one step reduction sequences *)
+Lemma star_step s t :
+  s → t -> s →* t.
+Proof.
+  intro H. eapply StarC.
+  + apply H.
+  + apply StarR.
+Qed.
+
+Lemma pair_star_l s s' t:
+  s →* s' -> Pair s t →* Pair s' t.
+Proof.
+  intros ; induction H ; eauto using step, full_step, star.
+Qed.
+
+Lemma pair_star_r s t t' :
+  t →* t' -> Pair s t →* Pair s t'.
+Proof.
+  intros ; induction H ; eauto using step, full_step, star.
+Qed.
+
+Lemma pair_star s s' t t' :
+  s →* s' -> t →* t' ->  Pair s t →* Pair s' t'.
+Proof.
+  intros. eapply star_trans.
+  - apply pair_star_l, H.
+  - apply pair_star_r, H0.
+Qed.
+
+Lemma app_star_l s s' t :
+  s →* s' -> App s t →* App s' t.
+Proof.
+  intros. induction H ; eauto using step, full_step, star.
+Qed.
+
+Lemma app_star_r s t t' :
+  t →* t' -> App s t →* App s t'.
+Proof.
+  intros. induction H ; eauto using step, full_step, star.
+Qed.
+
+Lemma app_star s s' t t' :
+  s →* s' ->  t →* t' -> App s t →* App s' t'.
+Proof.
+  intros. eapply star_trans.
+  apply app_star_l, H.
+  apply app_star_r, H0.
+Qed.
+
+(*Inductive isValue : term -> Prop :=
 | const_value k : isValue (Const k)
 | abs_value s : isValue (Abs s)
 | fst_value : isValue Fst
@@ -127,86 +219,11 @@ Inductive is_value : term -> Prop :=
 | Value_join : is_value Join
 | Value_join_label l : is_value (App Join (Label l)).
 
-Inductive full_step : term -> term -> Prop :=
-| FullStep_step s t :
-   step s t -> full_step s t
-| FullStep_abs s t :
-   full_step s t -> full_step (Abs s) (Abs t)
-| FullStep_app_l s s' t :
-   full_step s s' -> full_step (App s t) (App s' t)
-| FullStep_app_r s t t' :
-   full_step t t' -> full_step (App s t) (App s t')
-| FullStep_let_l s s' t :
-   full_step s s' -> full_step (Let s t) (Let s' t)
-| FullStep_let_r s t t' :
-   full_step t t' -> full_step (Let s t) (Let s t')
-| FullStep_pair_l s s' t :
-   full_step s s' -> full_step (Pair s t) (Pair s' t)
-| FullStep_pair_r s t t':
-   full_step t t' -> full_step (Pair s t) (Pair s t').
 
-Notation "s → t" := (full_step s t) (at level 70).
 
-Inductive star : term -> term -> Prop :=
-| StarR p : star p p
-| StarC x y z : x → y -> star y z -> star x z.
-Notation "s →* t" := (star s t) (at level 70).
 
-Lemma star_step s t :
-  s → t -> s →* t.
-Proof.
-  intros. eapply StarC.
-  + apply H.
-  + apply StarR.
-Qed.
 
-Lemma star_trans s t u :
-  s →* t -> t →* u -> s →* u.
-Proof.
-  intros. revert u H0. induction H ; intros ; simpl.
-  - assumption.
-  - eapply StarC. eassumption. apply IHstar. assumption.
-Qed.
 
-Lemma pair_star_l s s' t:
-  s →* s' -> Pair s t →* Pair s' t.
-Proof.
-  intros ; induction H ; eauto using step, full_step, star.
-Qed.
-
-Lemma pair_star_r s t t' :
-  t →* t' -> Pair s t →* Pair s t'.
-Proof.
-  intros ; induction H ; eauto using step, full_step, star.
-Qed.
-
-Lemma pair_star s s' t t' :
-  s →* s' -> t →* t' ->  Pair s t →* Pair s' t'.
-Proof.
-  intros. eapply star_trans.
-  - apply pair_star_l, H.
-  - apply pair_star_r, H0.
-Qed.
-
-Lemma app_star_l s s' t :
-  s →* s' -> App s t →* App s' t.
-Proof.
-  intros. induction H ; eauto using step, full_step, star.
-Qed.
-
-Lemma app_star_r s t t' :
-  t →* t' -> App s t →* App s t'.
-Proof.
-  intros. induction H ; eauto using step, full_step, star.
-Qed.
-
-Lemma app_star s s' t t' :
-  s →* s' ->  t →* t' -> App s t →* App s' t'.
-Proof.
-  intros. eapply star_trans.
-  apply app_star_l, H.
-  apply app_star_r, H0.
-Qed.
 
 Lemma let_star_l s s' t :
   s →* s' -> Let s t →* Let s' t.
