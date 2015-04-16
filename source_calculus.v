@@ -410,6 +410,25 @@ Qed.
 
 
 
+(* Following the original paper, the primary result we want to prove
+   for the source calculus is stability, which roughly states that
+   the labels contained in the result of a reduction sequence are the
+   only labels the reduction sequence depends on - that is,
+   they can be stripped out of the initial term of the reduction
+   sequence and the sequence will still work.
+
+   Stability is a key element of our proof of non-interference. *)
+
+(* First, we need a way to talk about the labels contained in a
+   term. Rather than collect these directly, we introduce
+   notation that strips a set of labels out of a term.
+   If a term remains the same after some set of labels is stripped
+   out, then obviously it doesn't contain any of the labels in the
+   set.
+
+   The original paper uses standard informal mathematical sets.
+   Here, we concretely represent this as a decidable boolean
+   predicate for set membership. *)
 
 Definition label_filter (p : label -> bool) :=
   fix f (e : prefix) := match e with
