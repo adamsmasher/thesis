@@ -107,7 +107,12 @@ Definition is_closed := n_closed 0.
    notion of evaluation contexts altogether. *)
 
 (* The only rule in our base evaluation relation that's non-standard
-   is the "lift" rule. TODO: etc *)
+   is the "lift" rule, which allows labels to "bubble up". This way
+   we can easily the labels of the data a computation relied on.
+   This is precisely how we implemented information flow
+   sensitivity for security typing - if we have the traditional set
+   of L and H labels, we can determine if a computation relied on
+   H-labelled data. *)
 
 Inductive step : prefix -> prefix -> Prop :=
 | Step_beta (s t : prefix) :
