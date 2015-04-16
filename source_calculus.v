@@ -77,7 +77,8 @@ Inductive is_term : prefix -> Prop :=
 (* The paper defines the typing relation solely over closed terms;
    thus, we need a way to talk about closedness. The following
    approach is taken from [Semantics course notes]; a term is
-   n_closed n if all free variables in it are less than n. An
+   n_closed n if all free variables in it are less than n (recall
+   that variables are represented by natural numbers). An
    n_closed 0 term is thus fully closed, as all free variables
    are less than 0 (i.e. do not exist). This approach is often
    necessary, rather than defining is_closed directly, to exploit
