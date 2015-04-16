@@ -42,7 +42,7 @@ Section SourceCalculus.
    is_term definition strongly resembles the prefix definition) and
    ensures lemmas are as general as possible. *)
 
-(* Note the use of the {bind prefix} type. This is how we notfy
+(* Note the use of the {bind prefix} type. This is how we inform
    Autosubst that the given term binds a variable. *)
 
 Inductive prefix : Type :=
