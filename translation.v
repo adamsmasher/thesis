@@ -24,7 +24,7 @@ Instance Subst_term : Subst term. derive. Defined.
 Instance SubstLemmas_term : SubstLemmas term. derive. Defined.
 
 (* to keep our lemmas concise, we choose the following
-   (somewhat confusing) notations, where a single step arrow
+   (admittedly confusing) notations, where a single step arrow
    corresponds to the source calculus single step but the
    reflexive transitive closure arrow is for the target calculus. *)
 Notation "s → t" := (source_calculus.full_step s t) (at level 70).
