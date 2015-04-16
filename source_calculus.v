@@ -222,7 +222,10 @@ Qed.
 (* Next, we need to prove a series of rather technical lemmas
    related to substitution. The first states that
    any substitution will preserve matchings, which makes intuitive
-   sense. *)
+   sense - any holes will remain holes on the left (matching
+   because holes match anything), and any substitution on the left
+   will happen in precisely the same way on the right (matching due
+   to reflexivity of matchings). *)
 
 Lemma subst_match e e' sigma :
   e ⪯ e' -> e.[sigma] ⪯ e'.[sigma].
