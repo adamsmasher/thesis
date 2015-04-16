@@ -431,6 +431,11 @@ Proof.
   simpl. intros H ; rewrite H. auto using step, full_step.
 Qed.
 
+(* Note the difference between this and Lemma 3.2 [etc]
+
+   As with match_step, we need lemmas both for the basic step
+   relation and the expanded fullstep relation. *)
+
 Lemma filter_step {s s'} :
   step s s' -> forall p, (⌊ s ⌋p → ⌊ s' ⌋p) \/ ⌊ s' ⌋p ⪯ ⌊ s ⌋p.
 Proof.
@@ -457,6 +462,7 @@ Proof.
     + auto using prefix_match.
 Qed.
 
+(* Finally, we have the proof of stability. *)
 Theorem stability e f p :
   is_term f -> e →* f -> ⌊ f ⌋p = f -> ⌊ e ⌋p →* f.
 Proof.
