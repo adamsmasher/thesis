@@ -249,6 +249,10 @@ Lemma abs_star s s' :
   s →* s' -> Abs s →* Abs s'.
 Proof.
   intros. induction H ; eauto using step, full_step, star.
-Qed.
+Qed.*)
 
 End TargetCalculus.
+
+(* This is duplicated outside of the section so that it's visible
+   in other modules. *)
+Notation "l @ m" := (App (App Join l) m) (at level 70).

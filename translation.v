@@ -6,7 +6,6 @@ Require Import Autosubst.
 
 Section Translation.
 
-Notation "l @ m" := (App (App Join l) m) (at level 70).
 
 Definition eta_fst (e : target_calculus.term) := match e with
 | Pair e1 _ => e1
