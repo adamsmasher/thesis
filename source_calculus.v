@@ -408,6 +408,11 @@ Proof.
     + reflexivity.
 Qed.
 
+(* As mentioned, each of these lemmas corresponds to a subcase of
+   Lemma 3.2 in the paper. Much as match_step was for
+   prefix_monotonicity, they serve as a kind of weakening of
+   stability for a single step. *)
+
 Lemma filter_beta p e1 e2 :
   ⌊ App (Abs e1) e2 ⌋p → ⌊ e1.[e2/] ⌋p.
 Proof.
