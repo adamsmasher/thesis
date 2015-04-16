@@ -436,7 +436,7 @@ Qed.
    As with match_step, we need lemmas both for the basic step
    relation and the expanded fullstep relation. *)
 
-Lemma filter_step {s s'} :
+Lemma filter_step s s' :
   step s s' -> forall p, (⌊ s ⌋p → ⌊ s' ⌋p) \/ ⌊ s' ⌋p ⪯ ⌊ s ⌋p.
 Proof.
   intros. induction H.
