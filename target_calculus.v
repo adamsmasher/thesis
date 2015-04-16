@@ -24,6 +24,37 @@ Inductive term : Type :=
 
 Notation "l @ m" := (App (App Join l) m) (at level 70).
 
+(* As with the source calculus, we use Autosubst to get
+   the substitution operation and lemmas. *)
+
+Instance Ids_term : Ids term. derive. Defined.
+Instance Rename_term : Rename term. derive. Defined.
+Instance Subst_term : Subst term. derive. Defined.
+Instance SubstLemmas_term : SubstLemmas term. derive. Defined.
+
+(* The target calculus step relation is adapted from the paper in
+   much the same way as the source calculus' step relation was.
+
+   Note that our step relation is the extended one, notated in the
+   paper as →@; that is, it includes the assoc and neutral to help
+   reason about the label join operation. *)
+
+Inductive step : term -> term -> Prop :=
+| Step_beta (s t : term) :
+   step (App (Abs s) t) s.[t/]
+| Step_let (s t : term) :
+   step (Let s t) t.[s/]
+| Step_fst s t :
+   step (App Fst (Pair s t)) s
+| Step_snd s t :
+   step (App Snd (Pair s t)) t
+| Step_join l m :
+   step ((Label l) @ (Label m)) (Label (l ⋎ m))
+| Step_assoc s t u :
+   step ((s @ t) @ u) (s @ (t @ u))
+| Step_neutral s :
+   step ((Label bottom) @ s) s.
+
 Inductive isValue : term -> Prop :=
 | const_value k : isValue (Const k)
 | abs_value s : isValue (Abs s)
@@ -42,11 +73,6 @@ Inductive is_subexpr : term -> term -> Prop :=
 | Sub_pair_r s t : is_subexpr t (Pair s t)
 | Sub_trans s t u : is_subexpr s t -> is_subexpr t u -> is_subexpr s u.
 
-
-Instance Ids_term : Ids term. derive. Defined.
-Instance Rename_term : Rename term. derive. Defined.
-Instance Subst_term : Subst term. derive. Defined.
-Instance SubstLemmas_term : SubstLemmas term. derive. Defined.
 
 Inductive n_closed (n : nat) : term -> Prop :=
 | ConstClosed k : n_closed n (Const k)
@@ -76,21 +102,6 @@ Proof.
   - ainv. now apply n_close_S, IHm.
 Qed.
 
-Inductive step : term -> term -> Prop :=
-| Step_beta (s t : term) :
-   step (App (Abs s) t) s.[t/]
-| Step_let (s t : term) :
-   step (Let s t) t.[s/]
-| Step_fst s t :
-   step (App Fst (Pair s t)) s
-| Step_snd s t :
-   step (App Snd (Pair s t)) t
-| Step_join l m :
-   step ((Label l) @ (Label m)) (Label (l ⋎ m))
-| Step_assoc s t u :
-   step ((s @ t) @ u) (s @ (t @ u))
-| Step_neutral s :
-   step ((Label bottom) @ s) s.
 
 Inductive cbn : term -> term -> Prop :=
 | CBN_step s t :
