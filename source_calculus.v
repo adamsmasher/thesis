@@ -80,10 +80,11 @@ Inductive is_term : prefix -> Prop :=
    n_closed n if all free variables in it are less than n (recall
    that variables are represented by natural numbers). An
    n_closed 0 term is thus fully closed, as all free variables
-   are less than 0 (i.e. do not exist). This approach is often
-   necessary, rather than defining is_closed directly, to exploit
-   induction over terms (as the subterm of a closed term may not
-   be fully closed, i.e. s in Abs s). *)
+   in this term are less than 0 (i.e. do not exist). This approach
+   is often necessary, rather than defining is_closed directly, to
+   exploit induction over terms (as the subterm of a closed term may
+   not be fully closed, i.e. Abs (Var 0) is closed, but Var 0 is
+   only n_closed 1). *)
 
 Inductive n_closed (n : nat) : prefix -> Prop :=
 | ConstClosed k : n_closed n (Const k)
@@ -102,7 +103,8 @@ Definition is_closed := n_closed 0.
    to be, in a sense, parametric over different evaluation strategies
    (notably call-by-name, call-by-value, and full reduction), we
    instead define a base evaluation relation and then embed it
-   inside the proper evaluation strategies *)
+   inside the proper evaluation strategies, eschewing the
+   notion of evaluation contexts altogether. *)
 
 (* The only rule in our base evaluation relation that's non-standard
    is the "lift" rule. TODO: etc *)
