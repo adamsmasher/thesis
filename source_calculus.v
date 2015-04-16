@@ -189,8 +189,8 @@ Inductive prefix_match : prefix -> prefix -> Prop :=
     prefix_match s1 s2 -> prefix_match t1 t2 ->
     prefix_match (Let s1 t1) (Let s2 t2)
 | LabelMatch s1 l1 s2 l2 :
-  l1 = l2 -> prefix_match s1 s2 ->
-  prefix_match (Label s1 l1) (Label s2 l2).
+    l1 = l2 -> prefix_match s1 s2 ->
+    prefix_match (Label s1 l1) (Label s2 l2).
 Notation "s ⪯ t" := (prefix_match s t) (at level 70).
 
 (* it's a useful and trivial result that matching is a relfexive
