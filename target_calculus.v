@@ -3,6 +3,10 @@ Require Import labels.
 
 Section TargetCalculus.
 
+(* The target calculus is basic functional programming language with
+   terms representing labels, a join function operating over them,
+   and pairs. *)
+
 Inductive term : Type :=
 | Const (k : nat)
 | Var (x : var)
