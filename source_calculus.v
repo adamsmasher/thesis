@@ -428,7 +428,7 @@ Qed.
 Lemma filter_lift p e1 e2 l :
   p l = true -> ⌊ App (Label e1 l) e2 ⌋p → ⌊ Label (App e1 e2) l ⌋p.
 Proof.
-  intros. simpl. rewrite H. auto using step, full_step.
+  simpl. intros H ; rewrite H. auto using step, full_step.
 Qed.
 
 Lemma filter_step {s s'} :
