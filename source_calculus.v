@@ -1,3 +1,14 @@
+(* In this file we define the source calculus - a simple programming
+   language capable of expressing information flow that will be
+   compiled down to a typed target calculus such that the target
+   calculus' type system can enforce the information flow constraints
+   without any security typing built-in. The idea is that the target
+   calculus may be some already existing language with a
+   sufficiently strong type system; by compiling our
+   information flow sensitive language into it and verifying the
+   correctness of our translation, we can effectively type the
+   source calculus without reproving correctness of the extended
+   type system. *)
 
 (* Pottier & Conchon have the luxury of eliding details of
    substitution, as is standard [cite]. Unfortunately, our mechanized
