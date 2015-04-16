@@ -107,6 +107,12 @@ Proof.
   + apply StarR.
 Qed.
 
+Lemma abs_star s s' :
+  s →* s' -> Abs s →* Abs s'.
+Proof.
+  intros. induction H ; eauto using step, full_step, star.
+Qed.
+
 Lemma pair_star_l s s' t:
   s →* s' -> Pair s t →* Pair s' t.
 Proof.
@@ -146,6 +152,27 @@ Proof.
   apply app_star_l, H.
   apply app_star_r, H0.
 Qed.
+
+Lemma let_star_l s s' t :
+  s →* s' -> Let s t →* Let s' t.
+Proof.
+  intros. induction H ; eauto using step, full_step, star.
+Qed.
+
+Lemma let_star_r s t t' :
+  t →* t' -> Let s t →* Let s t'.
+Proof.
+  intros. induction H ; eauto using step, full_step, star.
+Qed.
+
+Lemma let_star s s' t t' :
+  s →* s' ->  t →* t' -> Let s t →* Let s' t'.
+Proof.
+  intros. eapply star_trans.
+  apply let_star_l, H.
+  apply let_star_r, H0.
+Qed.
+
 
 (*Inductive isValue : term -> Prop :=
 | const_value k : isValue (Const k)
@@ -218,38 +245,7 @@ Inductive is_value : term -> Prop :=
 | Value_label l : is_value (Label l)
 | Value_join : is_value Join
 | Value_join_label l : is_value (App Join (Label l)).
-
-
-
-
-
-
-
-Lemma let_star_l s s' t :
-  s →* s' -> Let s t →* Let s' t.
-Proof.
-  intros. induction H ; eauto using step, full_step, star.
-Qed.
-
-Lemma let_star_r s t t' :
-  t →* t' -> Let s t →* Let s t'.
-Proof.
-  intros. induction H ; eauto using step, full_step, star.
-Qed.
-
-Lemma let_star s s' t t' :
-  s →* s' ->  t →* t' -> Let s t →* Let s' t'.
-Proof.
-  intros. eapply star_trans.
-  apply let_star_l, H.
-  apply let_star_r, H0.
-Qed.
-
-Lemma abs_star s s' :
-  s →* s' -> Abs s →* Abs s'.
-Proof.
-  intros. induction H ; eauto using step, full_step, star.
-Qed.*)
+*)
 
 End TargetCalculus.
 
