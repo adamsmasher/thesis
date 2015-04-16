@@ -363,8 +363,11 @@ Definition label_filter (p : label -> bool) :=
   | Abs e => Abs (f e)
   | App e1 e2 => App (f e1) (f e2)
   | Let e1 e2 => Let (f e1) (f e2)
-  end. 
+  end.
 Notation "⌊ e ⌋ p" := (label_filter p e) (at level 70).
+
+(* Again, we won't be able to prove our desired theorem directly.
+   First, we need to teach autosubst [etc] *)
 
 Lemma ren_filter xi p :
   label_filter p >>> subst (xi >>> ids)
@@ -375,6 +378,8 @@ Proof.
   destruct (p l); asimpl; try f_equal; eauto.
 Qed.
 
+(* This teaches Autosubst to use this rewrite rule with its
+   autosubst tactic, to help make proofs using it go smoothly *)
 Hint Rewrite @ren_filter : autosubst.
 
 Lemma filter_subst p e sigma:
