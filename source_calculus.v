@@ -473,8 +473,7 @@ Proof.
     + eapply prefix_monotonicity ; eauto.
 Qed.
 
-
-Definition term_subst sigma := forall (x : var), is_term (sigma x).
+(* Definition term_subst sigma := forall (x : var), is_term (sigma x).
 
 Lemma ren_term s r :
   is_term s -> is_term s.[ren r].
@@ -545,6 +544,6 @@ Proof.
   - inversion H1 ; subst. constructor ; auto.
   - inversion H1 ; subst. constructor ; auto.
   - inversion H1 ; subst. constructor ; auto.
-Qed.
+Qed.*)
 
 End SourceCalculus.
