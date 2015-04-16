@@ -3,8 +3,6 @@ Require Import labels.
 
 Section TargetCalculus.
 
-Notation "l ⋎ m" := (join l m) (at level 70).
-
 Inductive term : Type :=
 | Const (k : nat)
 | Var (x : var)
