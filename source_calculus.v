@@ -385,18 +385,18 @@ Hint Rewrite @ren_filter : autosubst.
 Lemma filter_subst p e sigma:
   (⌊ e ⌋p).[sigma >>> label_filter p] = ⌊ e.[sigma] ⌋p.
 Proof.
-  revert sigma. induction e ; intros.
-  - simpl. reflexivity.
-  - simpl. reflexivity.
-  - simpl. reflexivity.
-  - asimpl. rewrite <- IHe. autosubst.
-  - simpl. now rewrite IHe1, IHe2.
-  - asimpl. f_equal.
+  revert sigma. induction e ; intros ; asimpl.
+  - reflexivity.
+  - reflexivity.
+  - reflexivity.
+  - rewrite <- IHe. autosubst.
+  - now rewrite IHe1, IHe2.
+  - f_equal.
     + apply IHe.
     + rewrite <- IHe0. autosubst.
-  - simpl. destruct (p l).
-    + simpl. now rewrite IHe.
-    + simpl. reflexivity.
+  - destruct (p l) ; simpl.
+    + now rewrite IHe.
+    + reflexivity.
 Qed.
 
 Lemma filter_beta p e1 e2 :
