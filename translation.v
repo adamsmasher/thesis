@@ -83,7 +83,15 @@ Fixpoint translation (e : source_calculus.prefix) : target_calculus.term :=
   end.
 Notation "⦇ e ⦈" := (translation e).
 
-(* Due to the aforementioned changes to the translation, we
+(* With translation defined, we'd like to show that, in some sense,
+   our translated terms correspond to their originals. In
+   particular, in order to show non-interference we'll need to
+   show that the evaluation relation can be lifted though
+   translation - if some source calculus term e evaluates to f
+   (in a single step), then the translation of e should evaluate
+   (in a sequence of steps) to the translation of f.
+
+   Due to the aforementioned changes to the translation, we
    cannot prove the simulation theorem as stated: we end up with
    situations where we would need two terms - specifically, terms
    of the form (Fst x, Snd x) and x - to be equivalent. Obviously,
