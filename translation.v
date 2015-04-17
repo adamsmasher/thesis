@@ -53,6 +53,18 @@ Definition eta_snd (e : target_calculus.term) := match e with
 | _ => App Snd e
 end.
 
+(* The definition of translation follows. Note that, as mentioned
+   above, translations are not guaranteed to be pairs (in the case
+   of variables), so we can no longer define it as two
+   (mutually recursive) functions.
+
+   The core idea of the translation process, however, is intact:
+   source calculus data become pairs in the target calculus,
+   with the first component containing the original datum and the
+   second component containing the datum's label (using the
+   semi-lattice join operation, we discard all but the highest
+   label associated with the datum). *)
+
 Fixpoint translation (e : source_calculus.prefix) : target_calculus.term :=
   match e with
   | source_calculus.Hole => Pair (Const 0) (Label bottom)
