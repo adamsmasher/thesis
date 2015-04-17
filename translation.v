@@ -30,6 +30,19 @@ Instance SubstLemmas_term : SubstLemmas term. derive. Defined.
 Notation "s → t" := (source_calculus.full_step s t) (at level 70).
 Notation "s →* t" := (target_calculus.star s t) (at level 70).
 
+(* the paper defines translation as a function from source
+   calculus terms to pairs of target calculus terms; unfortunately
+   we can't do this [due to issues with substitution, expand].
+   In particular, variables don't get eta expanded out into
+   (fst x, snd x). This has serious ramifications throughout
+   the proof that will be discussed as they come up; the first is
+   that the paper's definition of translation must be modified
+   slightly so as to accomodate the fact that a first and second
+   component of a translated term might not exist. The following
+   two functions are instead used to destruct a translation; in
+   the event that the translation of a term isn't a pair, we
+   manually apply the correct destructor. *)
+
 Definition eta_fst (e : target_calculus.term) := match e with
 | Pair e1 _ => e1
 | _ => App Fst e
