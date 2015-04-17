@@ -118,6 +118,11 @@ Proof.
   induction x ; simpl ; eauto using eta_eq.
 Qed.
 
+(* The following two lemmas show correctness for eta_fst and
+   eta_snd, in a sense: when eta_fst or eta_snd is applied to s,
+   the result is something (Fst s) or (Snd s) would eventually
+   evaluate to. *)
+
 Lemma eta_fst_app s :
   App Fst s →* eta_fst s.
 Proof.
