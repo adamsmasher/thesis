@@ -113,13 +113,15 @@ Qed.
 Lemma eta_fst_app s :
   App Fst s →* eta_fst s.
 Proof.
-  destruct s ; simpl ; try constructor. apply star_step, FullStep_step, Step_fst.
+  destruct s ; simpl ; try constructor.
+  apply star_step, FullStep_step, Step_fst.
 Qed.
 
 Lemma eta_snd_app s :
   App Snd s →* eta_snd s.
 Proof.
-  destruct s ; simpl ; try constructor. apply star_step, FullStep_step, Step_snd.
+  destruct s ; simpl ; try constructor.
+  apply star_step, FullStep_step, Step_snd.
 Qed.
 
 Lemma eta_fst_step s u :
