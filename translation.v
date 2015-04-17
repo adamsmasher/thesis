@@ -83,6 +83,13 @@ Fixpoint translation (e : source_calculus.prefix) : target_calculus.term :=
   end.
 Notation "⦇ e ⦈" := (translation e).
 
+(* Due to the aforementioned changes to the translation, we
+   cannot prove the simulation theorem as stated: we end up with
+   situations where we would need two terms - specifically, terms
+   of the form (Fst x, Snd x) and x - to be equivalent. Obviously,
+   in some useful sense they are, so we encode this property into
+   the following inductive predicate, eta_eq. *)
+
 Inductive eta_eq : term -> term -> Prop :=
 | EtaEqR s : eta_eq s s
 | EtaEqS s t : eta_eq s t -> eta_eq t s
@@ -95,6 +102,8 @@ Inductive eta_eq : term -> term -> Prop :=
 | EtaEqLet s s' t t' : eta_eq s s' -> eta_eq t t' -> eta_eq (Let s t) (Let s' t')
 | EtaEqPair s s' t t' : eta_eq s s' -> eta_eq t t' -> eta_eq (Pair s t) (Pair s' t').
 
+(* This lemma shows a key relationship between eta_eq and the
+   eta_fst and eta_snd functions defined above. *)
 Lemma eta_pair x :
   eta_eq (Pair (eta_fst x) (eta_snd x)) x.
 Proof.
