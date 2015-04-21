@@ -177,7 +177,8 @@ Qed.
 
 (* The following series of lemmas work towards eta_fst_star and
    eta_snd_star, results that show that eta_fst and eta_snd are
-   monotonic with respect to the star relation. *)
+   monotonic with respect to the star relation. This fact will
+   be used when proving simulation. *)
 
 Lemma eta_fst_step s u :
   target_calculus.step s u -> eta_fst s →* eta_fst u.
