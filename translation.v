@@ -402,19 +402,19 @@ Proof.
   - constructor.
 Qed.
 
-Lemma simulation_step (e f : source_calculus.prefix) (He : is_term e) (Hf : is_term f) :
-  source_calculus.step e f  -> exists u, ⦇e⦈ →* u /\ eta_eq u ⦇f⦈.
+Lemma simulation_step (e f : source_calculus.prefix) :
+  is_term e -> is_term f -> source_calculus.step e f  -> exists u, ⦇e⦈ →* u /\ eta_eq u ⦇f⦈.
 Proof.
-  intros. destruct H ; ainv.
+  destruct 3 ; ainv.
   - now apply simulation_beta.
   - now apply simulation_let.
   - now apply simulation_label.
 Qed.
 
-Lemma simulation (e f : source_calculus.prefix) (He : is_term e) (Hf : is_term f) :
-  e → f  -> exists u, ⦇e⦈  →* u /\ eta_eq u ⦇f⦈.
+Lemma simulation (e f : source_calculus.prefix) :
+  is_term e -> is_term f -> e → f  -> exists u, ⦇e⦈  →* u /\ eta_eq u ⦇f⦈.
 Proof.
-  intros. induction H ; ainv ; simpl.
+  induction 3 ; ainv ; simpl.
   - now apply simulation_step.
   - destruct IHfull_step as [x []]; auto. repeat esplit.
     + apply pair_star_l, abs_star. eassumption.
