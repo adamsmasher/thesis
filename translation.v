@@ -124,12 +124,36 @@ Inductive eta_eq : term -> term -> Prop :=
    substitution are generally elided there, little of this
    corresponds to anything in the original paper. *)
 
-(* This lemma shows a key relationship between eta_eq and the
+(* These lemmas show key relationships between eta_eq and the
    eta_fst and eta_snd functions defined above. *)
 Lemma eta_pair x :
   eta_eq (Pair (eta_fst x) (eta_snd x)) x.
 Proof.
   induction x ; simpl ; eauto using eta_eq.
+Qed.
+
+Lemma eq_app_fst_eta_fst s :
+  eta_eq (App Fst s) (eta_fst s).
+Proof.
+  destruct s ; eauto using eta_eq.
+Qed.
+
+Lemma eq_app_snd_eta_snd s :
+  eta_eq (App Snd s) (eta_snd s).
+Proof.
+  destruct s ; eauto using eta_eq.
+Qed.
+
+Lemma eta_eq_fst s t :
+  eta_eq s t -> eta_eq (eta_fst s) (eta_fst t).
+Proof.
+  induction 1 ; eauto using eta_eq, eq_app_fst_eta_fst.
+Qed.
+
+Lemma eta_eq_snd s t :
+  eta_eq s t -> eta_eq (eta_snd s) (eta_snd t).
+Proof.
+  induction 1 ; eauto using eta_eq, eq_app_snd_eta_snd.
 Qed.
 
 (* The following two lemmas show correctness for eta_fst and
@@ -243,30 +267,6 @@ Proof.
   induction 1.
   - constructor.
   - apply eta_snd_full_step in H. eapply star_trans ; eauto.
-Qed.
-
-Lemma eq_app_fst_eta_fst s :
-  eta_eq (App Fst s) (eta_fst s).
-Proof.
-  destruct s ; eauto using eta_eq.
-Qed.
-
-Lemma eq_app_snd_eta_snd s :
-  eta_eq (App Snd s) (eta_snd s).
-Proof.
-  destruct s ; eauto using eta_eq.
-Qed.
-
-Lemma eta_eq_fst s t :
-  eta_eq s t -> eta_eq (eta_fst s) (eta_fst t).
-Proof.
-  induction 1 ; eauto using eta_eq, eq_app_fst_eta_fst.
-Qed.
-
-Lemma eta_eq_snd s t :
-  eta_eq s t -> eta_eq (eta_snd s) (eta_snd t).
-Proof.
-  induction 1 ; eauto using eta_eq, eq_app_snd_eta_snd.
 Qed.
 
 Lemma fst_ren s xi :
