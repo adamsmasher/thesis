@@ -365,6 +365,9 @@ Proof.
     destruct H as [sigma [HL HR]]. autorew. now apply five_one.
 Qed.
 
+(* To simplify the proof of simuation, we've split it up into
+   separate lemmas for each case of the step relation. *)
+
 Lemma simulation_beta s t :
   is_term s -> is_term t -> exists u, ⦇source_calculus.App (source_calculus.Abs s) t⦈ →* u /\ eta_eq u ⦇s.[t/]⦈.
 Proof.
