@@ -147,27 +147,33 @@ Proof.
 Qed.
 
 Lemma eta_fst_step s u :
+  target_calculus.step s u -> eta_fst s →* eta_fst u.
+Proof.
+  destruct 1 ; simpl.
+  - eapply star_trans.
+    + apply app_star_r. apply star_step, FullStep_step, Step_beta.
+    + apply eta_fst_app.
+  - eapply star_trans.
+    + apply app_star_r. apply star_step, FullStep_step, Step_let.
+    + apply eta_fst_app.
+  - eapply star_trans.
+    + apply app_star_r. apply star_step, FullStep_step, Step_fst.
+    + apply eta_fst_app.
+  - eapply star_trans.
+    + apply app_star_r. apply star_step, FullStep_step, Step_snd.
+    + apply eta_fst_app.
+  - apply app_star_r. apply star_step, FullStep_step, Step_join.
+  - apply app_star_r. apply star_step, FullStep_step, Step_assoc.
+  - eapply star_trans.
+    + apply app_star_r. apply star_step, FullStep_step, Step_neutral.
+    + apply eta_fst_app.
+Qed.
+
+Lemma eta_fst_full_step s u :
   target_calculus.full_step s u -> eta_fst s →* eta_fst u.
 Proof.
-  intros. destruct H ; simpl.
-  - destruct H ; simpl.
-    + eapply star_trans.
-       * apply app_star_r. apply star_step, FullStep_step, Step_beta.
-       * apply eta_fst_app.
-    + eapply star_trans.
-       * apply app_star_r. apply star_step, FullStep_step, Step_let.
-       * apply eta_fst_app.
-    + eapply star_trans.
-       * apply app_star_r. apply star_step, FullStep_step, Step_fst.
-       * apply eta_fst_app.
-    + eapply star_trans.
-       * apply app_star_r. apply star_step, FullStep_step, Step_snd.
-       * apply eta_fst_app.
-    + apply app_star_r. apply star_step, FullStep_step, Step_join.
-    + apply app_star_r. apply star_step, FullStep_step, Step_assoc.
-    + eapply star_trans.
-       * apply app_star_r. apply star_step, FullStep_step, Step_neutral.
-       * apply eta_fst_app.
+  destruct 1 ; simpl.
+  - now apply eta_fst_step.
   - apply app_star_r. apply abs_star. econstructor ; eauto. constructor.
   - apply app_star_r. apply app_star_l. econstructor ; eauto. constructor.
   - apply app_star_r. apply app_star_r. econstructor ; eauto. constructor.
@@ -178,27 +184,33 @@ Proof.
 Qed.
 
 Lemma eta_snd_step s u :
+  target_calculus.step s u -> eta_snd s →* eta_snd u.
+Proof.
+  destruct 1 ; simpl.
+  - eapply star_trans.
+    + apply app_star_r. apply star_step, FullStep_step, Step_beta.
+    + apply eta_snd_app.
+  - eapply star_trans.
+    + apply app_star_r. apply star_step, FullStep_step, Step_let.
+    + apply eta_snd_app.
+  - eapply star_trans.
+    + apply app_star_r. apply star_step, FullStep_step, Step_fst.
+    + apply eta_snd_app.
+  - eapply star_trans.
+    + apply app_star_r. apply star_step, FullStep_step, Step_snd.
+    + apply eta_snd_app.
+  - apply app_star_r. apply star_step, FullStep_step, Step_join.
+  - apply app_star_r. apply star_step, FullStep_step, Step_assoc.
+  - eapply star_trans.
+    + apply app_star_r. apply star_step, FullStep_step, Step_neutral.
+    + apply eta_snd_app.
+Qed.
+
+Lemma eta_snd_full_step s u :
   target_calculus.full_step s u -> eta_snd s →* eta_snd u.
 Proof.
-  intros. destruct H ; simpl.
-  - destruct H ; simpl.
-    + eapply star_trans.
-       * apply app_star_r. apply star_step, FullStep_step, Step_beta.
-       * apply eta_snd_app.
-    + eapply star_trans.
-       * apply app_star_r. apply star_step, FullStep_step, Step_let.
-       * apply eta_snd_app.
-    + eapply star_trans.
-       * apply app_star_r. apply star_step, FullStep_step, Step_fst.
-       * apply eta_snd_app.
-    + eapply star_trans.
-       * apply app_star_r. apply star_step, FullStep_step, Step_snd.
-       * apply eta_snd_app.
-    + apply app_star_r. apply star_step, FullStep_step, Step_join.
-    + apply app_star_r. apply star_step, FullStep_step, Step_assoc.
-    + eapply star_trans.
-       * apply app_star_r. apply star_step, FullStep_step, Step_neutral.
-       * apply eta_snd_app.
+  destruct 1 ; simpl.
+  - now apply eta_snd_step.
   - apply app_star_r. apply abs_star. econstructor ; eauto. constructor.
   - apply app_star_r. apply app_star_l. econstructor ; eauto. constructor.
   - apply app_star_r. apply app_star_r. econstructor ; eauto. constructor.
@@ -213,7 +225,7 @@ Lemma eta_fst_star s u :
 Proof.
   intros. induction H.
   - constructor.
-  - apply eta_fst_step in H. eapply star_trans ; eauto.
+  - apply eta_fst_full_step in H. eapply star_trans ; eauto.
 Qed.
 
 Lemma eta_snd_star s u :
@@ -221,7 +233,7 @@ Lemma eta_snd_star s u :
 Proof.
   intros. induction H.
   - constructor.
-  - apply eta_snd_step in H. eapply star_trans ; eauto.
+  - apply eta_snd_full_step in H. eapply star_trans ; eauto.
 Qed.
 
 Lemma eq_app_fst_eta_fst s :
