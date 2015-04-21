@@ -117,12 +117,12 @@ Inductive eta_eq : term -> term -> Prop :=
 
 (* The bulk of the remainder of this development consists of various
    lemmas concerning the relationship between eta_fst/eta_snd,
-   eta_eq, translation, and substitution, all ultimately leading
-   to a final proof of the simulation result; because neither
-   eta_fst/eta_snd nor eta_eq exist in Pottier & Conchon's
-   formulation, and because issues related to substitution are
-   generally elided there, little of this corresponds to anything in
-   the original paper. *)
+   eta_eq, the step relation, translation, and substitution, all
+   ultimately leading to a final proof of the simulation result;
+   because neither eta_fst/eta_snd nor eta_eq exist in
+   Pottier & Conchon's formulation, and because issues related to
+   substitution are generally elided there, little of this
+   corresponds to anything in the original paper. *)
 
 (* This lemma shows a key relationship between eta_eq and the
    eta_fst and eta_snd functions defined above. *)
@@ -150,6 +150,10 @@ Proof.
   destruct s ; simpl ; try constructor.
   apply star_step, FullStep_step, Step_snd.
 Qed.
+
+(* The following series of lemmas work towards eta_fst_star and
+   eta_snd_star, results that show that eta_fst and eta_snd are
+   monotonic with respect to the star relation. *)
 
 Lemma eta_fst_step s u :
   target_calculus.step s u -> eta_fst s →* eta_fst u.
