@@ -371,7 +371,7 @@ Qed.
 Lemma simulation_beta s t :
   is_term s -> is_term t -> exists u, ⦇source_calculus.App (source_calculus.Abs s) t⦈ →* u /\ eta_eq u ⦇s.[t/]⦈.
 Proof.
-  intros. simpl. esplit. split.
+  simpl. repeat esplit.
   - eapply star_trans.
     + apply pair_star.
       * apply app_star_r. apply star_step, FullStep_step, Step_beta.
@@ -387,7 +387,7 @@ Qed.
 Lemma simulation_let s t :
   is_term s -> is_term t -> exists u, ( ⦇source_calculus.Let s t⦈ →* u /\ eta_eq u ⦇t.[s/]⦈).
 Proof.
-  intros. simpl. esplit. split.
+  simpl. repeat esplit.
   - eapply star_trans.
     + apply pair_star ; apply star_step, FullStep_step, Step_let.
     + apply pair_star ; now apply five_one'.
