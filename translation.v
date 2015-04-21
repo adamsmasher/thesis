@@ -110,6 +110,15 @@ Inductive eta_eq : term -> term -> Prop :=
 | EtaEqLet s s' t t' : eta_eq s s' -> eta_eq t t' -> eta_eq (Let s t) (Let s' t')
 | EtaEqPair s s' t t' : eta_eq s s' -> eta_eq t t' -> eta_eq (Pair s t) (Pair s' t').
 
+(* The bulk of the remainder of this development consists of various
+   lemmas concerning the relationship between eta_fst/eta_snd,
+   eta_eq, translation, and substitution, all ultimately leading
+   to a final proof of the simulation result; because neither
+   eta_fst/eta_snd nor eta_eq exist in Pottier & Conchon's
+   formulation, and because issues related to substitution are
+   generally elided there, little of this corresponds to anything in
+   the original paper. *)
+
 (* This lemma shows a key relationship between eta_eq and the
    eta_fst and eta_snd functions defined above. *)
 Lemma eta_pair x :
