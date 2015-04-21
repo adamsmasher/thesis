@@ -65,7 +65,8 @@ end.
    semi-lattice join operation, we discard all but the highest
    label associated with the datum). *)
 
-Fixpoint translation (e : source_calculus.prefix) : target_calculus.term :=
+Fixpoint translation (e : source_calculus.prefix) :
+    target_calculus.term :=
   match e with
   | source_calculus.Hole => Pair (Const 0) (Label bottom)
   | source_calculus.Const k => Pair (Const k) (Label bottom)
@@ -73,7 +74,8 @@ Fixpoint translation (e : source_calculus.prefix) : target_calculus.term :=
   | source_calculus.Abs e => Pair (Abs (translation e)) (Label bottom)
   | source_calculus.App e1 e2 => Pair
      (App Fst (App (eta_fst (translation e1)) (translation e2)))
-     ((eta_snd (translation e1)) @ (App Snd (App (eta_fst (translation e1)) (translation e2))))
+     ((eta_snd (translation e1)) @
+      (App Snd (App (eta_fst (translation e1)) (translation e2))))
   | source_calculus.Let e1 e2 => Pair
       (Let (translation e1) (eta_fst (translation e2)))
       (Let (translation e1) (eta_snd (translation e2)))
@@ -106,9 +108,12 @@ Inductive eta_eq : term -> term -> Prop :=
 | EtaEqFst s t : eta_eq (App Fst (Pair s t)) s
 | EtaEqSnd s t : eta_eq (App Snd (Pair s t)) t
 | EtaEqAbs s t : eta_eq s t -> eta_eq (Abs s) (Abs t)
-| EtaEqApp s s' t t' : eta_eq s s' -> eta_eq t t' -> eta_eq (App s t) (App s' t')
-| EtaEqLet s s' t t' : eta_eq s s' -> eta_eq t t' -> eta_eq (Let s t) (Let s' t')
-| EtaEqPair s s' t t' : eta_eq s s' -> eta_eq t t' -> eta_eq (Pair s t) (Pair s' t').
+| EtaEqApp s s' t t' :
+    eta_eq s s' -> eta_eq t t' -> eta_eq (App s t) (App s' t')
+| EtaEqLet s s' t t' :
+    eta_eq s s' -> eta_eq t t' -> eta_eq (Let s t) (Let s' t')
+| EtaEqPair s s' t t' :
+    eta_eq s s' -> eta_eq t t' -> eta_eq (Pair s t) (Pair s' t').
 
 (* The bulk of the remainder of this development consists of various
    lemmas concerning the relationship between eta_fst/eta_snd,
