@@ -183,12 +183,12 @@ Lemma eta_fst_full_step s u :
 Proof.
   destruct 1 ; simpl.
   - now apply eta_fst_step.
-  - apply app_star_r. apply abs_star. econstructor ; eauto. constructor.
-  - apply app_star_r. apply app_star_l. econstructor ; eauto. constructor.
-  - apply app_star_r. apply app_star_r. econstructor ; eauto. constructor.
-  - apply app_star_r. apply let_star_l. econstructor ; eauto. constructor.
-  - apply app_star_r. apply let_star_r. econstructor ; eauto. constructor.
-  - econstructor ; eauto. constructor.
+  - apply app_star_r. apply abs_star. now apply star_step.
+  - apply app_star_r. apply app_star_l. now apply star_step.
+  - apply app_star_r. apply app_star_r. now apply star_step.
+  - apply app_star_r. apply let_star_l. now apply star_step.
+  - apply app_star_r. apply let_star_r. now apply star_step.
+  - now apply star_step.
   - constructor.
 Qed.
 
@@ -220,19 +220,19 @@ Lemma eta_snd_full_step s u :
 Proof.
   destruct 1 ; simpl.
   - now apply eta_snd_step.
-  - apply app_star_r. apply abs_star. econstructor ; eauto. constructor.
-  - apply app_star_r. apply app_star_l. econstructor ; eauto. constructor.
-  - apply app_star_r. apply app_star_r. econstructor ; eauto. constructor.
-  - apply app_star_r. apply let_star_l. econstructor ; eauto. constructor.
-  - apply app_star_r. apply let_star_r. econstructor ; eauto. constructor.
+  - apply app_star_r. apply abs_star. now apply star_step.
+  - apply app_star_r. apply app_star_l. now apply star_step.
+  - apply app_star_r. apply app_star_r. now apply star_step.
+  - apply app_star_r. apply let_star_l. now apply star_step.
+  - apply app_star_r. apply let_star_r. now apply star_step.
   - constructor.
-  - econstructor ; eauto. constructor.
+  - now apply star_step.
 Qed.
 
 Lemma eta_fst_star s u :
   s →* u -> eta_fst s →* eta_fst u.
 Proof.
-  intros. induction H.
+  induction 1.
   - constructor.
   - apply eta_fst_full_step in H. eapply star_trans ; eauto.
 Qed.
@@ -240,7 +240,7 @@ Qed.
 Lemma eta_snd_star s u :
   s →* u -> eta_snd s →* eta_snd u.
 Proof.
-  intros. induction H.
+  induction 1.
   - constructor.
   - apply eta_snd_full_step in H. eapply star_trans ; eauto.
 Qed.
