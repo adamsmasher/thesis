@@ -365,10 +365,10 @@ Proof.
     destruct H as [sigma [HL HR]]. autorew. now apply five_one.
 Qed.
 
-Lemma simulation_beta s t (H : is_term (source_calculus.App (source_calculus.Abs s) t)) :
-  exists u, ⦇source_calculus.App (source_calculus.Abs s) t⦈ →* u /\ eta_eq u ⦇s.[t/]⦈.
+Lemma simulation_beta s t :
+  is_term s -> is_term t -> exists u, ⦇source_calculus.App (source_calculus.Abs s) t⦈ →* u /\ eta_eq u ⦇s.[t/]⦈.
 Proof.
-  ainv. simpl. esplit. split.
+  intros. simpl. esplit. split.
   - eapply star_trans.
     + apply pair_star.
       * apply app_star_r. apply star_step, FullStep_step, Step_beta.
@@ -381,20 +381,20 @@ Proof.
   - apply EtaEqEta.
 Qed.
 
-Lemma simulation_let s t (H : is_term (source_calculus.Let s t)) :
-  exists u, ( ⦇source_calculus.Let s t⦈ →* u /\ eta_eq u ⦇t.[s/]⦈).
+Lemma simulation_let s t :
+  is_term s -> is_term t -> exists u, ( ⦇source_calculus.Let s t⦈ →* u /\ eta_eq u ⦇t.[s/]⦈).
 Proof.
-  ainv. simpl. esplit. split.
+  intros. simpl. esplit. split.
   - eapply star_trans.
     + apply pair_star ; apply star_step, FullStep_step, Step_let.
     + apply pair_star ; now apply five_one'.
   - apply eta_pair.
 Qed.
 
-Lemma simulation_label s l t (H : is_term (source_calculus.App (source_calculus.Label s l) t)) :
+Lemma simulation_label s l t :
   exists u, ⦇source_calculus.App (source_calculus.Label s l ) t⦈ →* u  /\ eta_eq u ⦇source_calculus.Label (source_calculus.App s t) l⦈.
 Proof.
-  ainv. simpl. repeat esplit.
+  intros. simpl. repeat esplit.
   - apply pair_star_r, star_step, FullStep_step, Step_assoc.
   - constructor.
 Qed.
@@ -402,7 +402,7 @@ Qed.
 Lemma simulation_step (e f : source_calculus.prefix) (He : is_term e) (Hf : is_term f) :
   source_calculus.step e f  -> exists u, ⦇e⦈ →* u /\ eta_eq u ⦇f⦈.
 Proof.
-  intros. destruct H.
+  intros. destruct H ; ainv.
   - now apply simulation_beta.
   - now apply simulation_let.
   - now apply simulation_label.
