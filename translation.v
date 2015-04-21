@@ -369,7 +369,11 @@ Qed.
    separate lemmas for each case of the step relation. *)
 
 Lemma simulation_beta s t :
-  is_term s -> is_term t -> exists u, ⦇source_calculus.App (source_calculus.Abs s) t⦈ →* u /\ eta_eq u ⦇s.[t/]⦈.
+  is_term s ->
+  is_term t ->
+  exists u,
+  ⦇source_calculus.App (source_calculus.Abs s) t⦈ →* u /\
+  eta_eq u ⦇s.[t/]⦈.
 Proof.
   simpl. repeat esplit.
   - eapply star_trans.
@@ -385,7 +389,11 @@ Proof.
 Qed.
 
 Lemma simulation_let s t :
-  is_term s -> is_term t -> exists u, ( ⦇source_calculus.Let s t⦈ →* u /\ eta_eq u ⦇t.[s/]⦈).
+  is_term s ->
+  is_term t ->
+  exists u,
+  ⦇source_calculus.Let s t⦈ →* u /\
+  eta_eq u ⦇t.[s/]⦈.
 Proof.
   simpl. repeat esplit.
   - eapply star_trans.
@@ -395,7 +403,9 @@ Proof.
 Qed.
 
 Lemma simulation_label s l t :
-  exists u, ⦇source_calculus.App (source_calculus.Label s l ) t⦈ →* u  /\ eta_eq u ⦇source_calculus.Label (source_calculus.App s t) l⦈.
+  exists u,
+  ⦇source_calculus.App (source_calculus.Label s l ) t⦈ →* u  /\
+  eta_eq u ⦇source_calculus.Label (source_calculus.App s t) l⦈.
 Proof.
   intros. simpl. repeat esplit.
   - apply pair_star_r, star_step, FullStep_step, Step_assoc.
@@ -403,7 +413,10 @@ Proof.
 Qed.
 
 Lemma simulation_step (e f : source_calculus.prefix) :
-  is_term e -> is_term f -> source_calculus.step e f  -> exists u, ⦇e⦈ →* u /\ eta_eq u ⦇f⦈.
+  is_term e ->
+  is_term f ->
+  source_calculus.step e f ->
+  exists u, ⦇e⦈ →* u /\ eta_eq u ⦇f⦈.
 Proof.
   destruct 3 ; ainv.
   - now apply simulation_beta.
@@ -412,7 +425,10 @@ Proof.
 Qed.
 
 Lemma simulation (e f : source_calculus.prefix) :
-  is_term e -> is_term f -> e → f  -> exists u, ⦇e⦈  →* u /\ eta_eq u ⦇f⦈.
+  is_term e ->
+  is_term f ->
+  e → f ->
+  exists u, ⦇e⦈  →* u /\ eta_eq u ⦇f⦈.
 Proof.
   induction 3 ; ainv ; simpl.
   - now apply simulation_step.
