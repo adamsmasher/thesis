@@ -350,28 +350,32 @@ Proof.
   - apply app_star_r. now apply IHe.
 Qed.
 
-Lemma five_one' e1 e2 (H1 : is_term e1) (H2 : is_term e2) :
-  ⦇e1⦈.[⦇e2⦈/] →* ⦇e1.[e2/]⦈ /\ (eta_fst ⦇e1⦈).[⦇e2⦈/] →* eta_fst ⦇e1.[e2/]⦈ /\ (eta_snd ⦇e1⦈).[⦇e2⦈/] →* eta_snd ⦇e1.[e2/]⦈.
+Lemma five_one' e1 e2 :
+  is_term e1 ->
+  is_term e2 ->
+  ⦇e1⦈.[⦇e2⦈/] →* ⦇e1.[e2/]⦈ /\
+  (eta_fst ⦇e1⦈).[⦇e2⦈/] →* eta_fst ⦇e1.[e2/]⦈ /\
+  (eta_snd ⦇e1⦈).[⦇e2⦈/] →* eta_snd ⦇e1.[e2/]⦈.
 Proof.
-  repeat split.
-  - assert (exists sigma, ⦇e1⦈.[scons (translation e2) ids] = ⦇e1⦈.[sigma >>> translation] /\ ⦇e1.[scons e2 ids]⦈ = ⦇e1.[sigma]⦈).
+  intros. repeat split.
+  - assert (exists sigma, ⦇e1⦈.[scons (translation e2) ids] = ⦇e1⦈.[sigma >>> translation] /\ ⦇e1.[scons e2 ids]⦈ = ⦇e1.[sigma]⦈) as H1.
     { unfold ids. unfold Ids_term. unfold funcomp. unfold scons.
       exists (fun x => match x with 0 => e2 | S y => source_calculus.Var y end).
       split ; auto. repeat f_equal ; f_ext ; intros ; destruct x ; auto.
     }
-    destruct H as [sigma [HL HR]]. autorew. now apply five_one.
-  - assert (exists sigma, (eta_fst ⦇e1⦈).[scons (translation e2) ids] = (eta_fst ⦇e1⦈).[sigma >>> translation] /\ eta_fst ⦇e1.[scons e2 ids]⦈ = eta_fst ⦇e1.[sigma]⦈).
+    destruct H1 as [sigma []]. autorew. now apply five_one.
+  - assert (exists sigma, (eta_fst ⦇e1⦈).[scons (translation e2) ids] = (eta_fst ⦇e1⦈).[sigma >>> translation] /\ eta_fst ⦇e1.[scons e2 ids]⦈ = eta_fst ⦇e1.[sigma]⦈) as H1.
     { unfold ids. unfold Ids_term. unfold funcomp. unfold scons.
       exists (fun x => match x with 0 => e2 | S y => source_calculus.Var y end).
       split ; auto. repeat f_equal ; f_ext ; intros ; destruct x ; auto.
     }
-    destruct H as [sigma [HL HR]]. autorew. now apply five_one.
-  - assert (exists sigma, (eta_snd ⦇e1⦈).[scons (translation e2) ids] = (eta_snd ⦇e1⦈).[sigma >>> translation] /\ eta_snd ⦇e1.[scons e2 ids]⦈ = eta_snd ⦇e1.[sigma]⦈).
+    destruct H1 as [sigma []]. autorew. now apply five_one.
+  - assert (exists sigma, (eta_snd ⦇e1⦈).[scons (translation e2) ids] = (eta_snd ⦇e1⦈).[sigma >>> translation] /\ eta_snd ⦇e1.[scons e2 ids]⦈ = eta_snd ⦇e1.[sigma]⦈) as H1.
     { unfold ids. unfold Ids_term. unfold funcomp. unfold scons.
       exists (fun x => match x with 0 => e2 | S y => source_calculus.Var y end).
       split ; auto. repeat f_equal ; f_ext ; intros ; destruct x ; auto.
     }
-    destruct H as [sigma [HL HR]]. autorew. now apply five_one.
+    destruct H1 as [sigma []]. autorew. now apply five_one.
 Qed.
 
 (* To simplify the proof of simuation, we've split it up into
