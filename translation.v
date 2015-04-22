@@ -284,17 +284,21 @@ Proof.
   destruct s ; simpl ; ainv.
 Qed.
 
-Lemma ren_translation xi : translation >>> (subst (xi >>> ids)) = subst (xi >>> ids) >>> translation.
+Lemma ren_translation xi :
+  translation >>> (subst (xi >>> ids)) = subst (xi >>> ids) >>> translation.
 Proof.
-  f_ext. intros s. simpl. revert xi. induction s ; intros ; asimpl ; autosubst_unfold ; try now autorew ;
-  repeat f_equal ; eauto using fst_ren, snd_ren.
+  f_ext. intro s. simpl. revert xi.
+  induction s ; intros ; asimpl ; autosubst_unfold ; try now autorew ;
+    repeat f_equal ; eauto using fst_ren, snd_ren.
 Qed.
 
 Hint Rewrite @ren_translation : autosubst.
 
 Lemma ren_up sigma :
     up sigma >>> translation = up (sigma >>> translation).
-Proof. autosubst. Qed.
+Proof.
+  autosubst.
+Qed.
 
 Lemma five_one e sigma (H1 : is_term e) :
    ⦇e⦈.[sigma >>> translation] →* ⦇e.[sigma]⦈ /\ (eta_fst ⦇e⦈).[sigma >>> translation] →* eta_fst ⦇e.[sigma]⦈ /\ (eta_snd ⦇e⦈).[sigma >>> translation] →* eta_snd ⦇e.[sigma]⦈.
