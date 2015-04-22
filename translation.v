@@ -306,13 +306,13 @@ Lemma five_one e sigma :
   (eta_fst ⦇e⦈).[sigma >>> translation] →* eta_fst ⦇e.[sigma]⦈ /\
   (eta_snd ⦇e⦈).[sigma >>> translation] →* eta_snd ⦇e.[sigma]⦈.
 Proof.
-  revert sigma. induction e ; intros ; simpl ; eauto using step, star ; ainv ; subst ; repeat split.
-  - constructor.
-  - destruct (sigma x) ; eauto using star, full_step, step.
-  - destruct (sigma x) ; eauto using star, full_step, step.
-  - apply pair_star_l. rewrite <- ren_up. apply abs_star. now apply IHe.
+  revert sigma. induction e ; intros ; simpl ; ainv ; subst ;
+    repeat split ; eauto 10 using step, star.
+  - apply eta_fst_app.
+  - apply eta_snd_app.
+  - apply pair_star_l. rewrite <- ren_up. apply abs_star.
+    now apply IHe.
   - rewrite <- ren_up. apply abs_star. now apply IHe.
-  - constructor.
   - apply pair_star.
     + apply app_star_r. apply app_star.
        * now apply IHe1.
