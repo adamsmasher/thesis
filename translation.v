@@ -295,7 +295,7 @@ Qed.
 Hint Rewrite @ren_translation : autosubst.
 
 Lemma ren_up sigma :
-    up sigma >>> translation = up (sigma >>> translation).
+  up (sigma >>> translation) = up sigma >>> translation.
 Proof.
   autosubst.
 Qed.
@@ -310,9 +310,9 @@ Proof.
     repeat split ; eauto 10 using step, star.
   - apply eta_fst_app.
   - apply eta_snd_app.
-  - apply pair_star_l. rewrite <- ren_up. apply abs_star.
+  - apply pair_star_l. rewrite ren_up. apply abs_star.
     now apply IHe.
-  - rewrite <- ren_up. apply abs_star. now apply IHe.
+  - rewrite ren_up. apply abs_star. now apply IHe.
   - apply pair_star.
     + apply app_star_r. apply app_star.
        * now apply IHe1.
@@ -333,16 +333,16 @@ Proof.
   - apply pair_star.
     + apply let_star.
        * now apply IHe.
-       * rewrite <- ren_up. now apply IHe0.
+       * rewrite ren_up. now apply IHe0.
     + apply let_star.
        * now apply IHe.
-       * rewrite <- ren_up. now apply IHe0.
+       * rewrite ren_up. now apply IHe0.
   - apply let_star.
     + now apply IHe.
-    + rewrite <- ren_up. now apply IHe0.
+    + rewrite ren_up. now apply IHe0.
   - apply let_star.
     + now apply IHe.
-    + rewrite <- ren_up. now apply IHe0.
+    + rewrite ren_up. now apply IHe0.
   - apply pair_star.
     + now apply IHe.
     + apply app_star_r. now apply IHe.
