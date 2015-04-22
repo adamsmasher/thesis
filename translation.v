@@ -359,20 +359,17 @@ Lemma five_one' e1 e2 :
 Proof.
   intros. repeat split.
   - assert (exists sigma, ⦇e1⦈.[⦇e2⦈/] = ⦇e1⦈.[sigma >>> translation] /\ ⦇e1.[e2/]⦈ = ⦇e1.[sigma]⦈) as H1.
-    { unfold ids. unfold Ids_term. unfold funcomp. unfold scons.
-      exists (fun x => match x with 0 => e2 | S y => source_calculus.Var y end).
+    { exists (fun x => match x with 0 => e2 | S y => source_calculus.Var y end).
       split ; auto. repeat f_equal ; f_ext ; intros ; destruct x ; auto.
     }
     destruct H1 as [sigma []]. autorew. now apply five_one.
   - assert (exists sigma, (eta_fst ⦇e1⦈).[⦇e2⦈/] = (eta_fst ⦇e1⦈).[sigma >>> translation] /\ eta_fst ⦇e1.[e2/]⦈ = eta_fst ⦇e1.[sigma]⦈) as H1.
-    { unfold ids. unfold Ids_term. unfold funcomp. unfold scons.
-      exists (fun x => match x with 0 => e2 | S y => source_calculus.Var y end).
+    { exists (fun x => match x with 0 => e2 | S y => source_calculus.Var y end).
       split ; auto. repeat f_equal ; f_ext ; intros ; destruct x ; auto.
     }
     destruct H1 as [sigma []]. autorew. now apply five_one.
   - assert (exists sigma, (eta_snd ⦇e1⦈).[⦇e2⦈/] = (eta_snd ⦇e1⦈).[sigma >>> translation] /\ eta_snd ⦇e1.[e2/]⦈ = eta_snd ⦇e1.[sigma]⦈) as H1.
-    { unfold ids. unfold Ids_term. unfold funcomp. unfold scons.
-      exists (fun x => match x with 0 => e2 | S y => source_calculus.Var y end).
+    { exists (fun x => match x with 0 => e2 | S y => source_calculus.Var y end).
       split ; auto. repeat f_equal ; f_ext ; intros ; destruct x ; auto.
     }
     destruct H1 as [sigma []]. autorew. now apply five_one.
