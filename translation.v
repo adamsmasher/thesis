@@ -271,15 +271,17 @@ Proof.
 Qed.
 
 Lemma fst_ren s xi :
-  ⦇s⦈.[ren xi] = ⦇s.[ren xi]⦈ -> (eta_fst ⦇s⦈).[ren xi] = eta_fst ⦇s.[ren xi]⦈.
+  ⦇s⦈.[ren xi] = ⦇s.[ren xi]⦈ ->
+  (eta_fst ⦇s⦈).[ren xi] = eta_fst ⦇s.[ren xi]⦈.
 Proof.
-  revert xi. destruct s ; intros xi H ; try autosubst ; simpl ; inversion H ; f_equal.
+  destruct s ; simpl ; ainv.
 Qed.
 
 Lemma snd_ren s xi :
-  ⦇s⦈.[ren xi] = ⦇s.[ren xi]⦈ -> (eta_snd ⦇s⦈).[ren xi] = eta_snd ⦇s.[ren xi]⦈.
+  ⦇s⦈.[ren xi] = ⦇s.[ren xi]⦈ ->
+  (eta_snd ⦇s⦈).[ren xi] = eta_snd ⦇s.[ren xi]⦈.
 Proof.
-  revert xi. destruct s ; intros xi H ; try autosubst ; simpl ; inversion H ; f_equal.
+  destruct s ; simpl ; ainv.
 Qed.
 
 Lemma ren_translation xi : translation >>> (subst (xi >>> ids)) = subst (xi >>> ids) >>> translation.
