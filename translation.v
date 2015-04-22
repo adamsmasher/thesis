@@ -300,10 +300,13 @@ Proof.
   autosubst.
 Qed.
 
-Lemma five_one e sigma (H1 : is_term e) :
-   ⦇e⦈.[sigma >>> translation] →* ⦇e.[sigma]⦈ /\ (eta_fst ⦇e⦈).[sigma >>> translation] →* eta_fst ⦇e.[sigma]⦈ /\ (eta_snd ⦇e⦈).[sigma >>> translation] →* eta_snd ⦇e.[sigma]⦈.
+Lemma five_one e sigma :
+  is_term e ->
+  ⦇e⦈.[sigma >>> translation] →* ⦇e.[sigma]⦈ /\
+  (eta_fst ⦇e⦈).[sigma >>> translation] →* eta_fst ⦇e.[sigma]⦈ /\
+  (eta_snd ⦇e⦈).[sigma >>> translation] →* eta_snd ⦇e.[sigma]⦈.
 Proof.
-  revert sigma. induction e ; intros ; simpl ; eauto using step, star ; inversion H1 ; subst ; repeat split.
+  revert sigma. induction e ; intros ; simpl ; eauto using step, star ; ainv ; subst ; repeat split.
   - constructor.
   - destruct (sigma x) ; eauto using star, full_step, step.
   - destruct (sigma x) ; eauto using star, full_step, step.
