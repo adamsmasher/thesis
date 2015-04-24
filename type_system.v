@@ -70,14 +70,16 @@ Proof.
     + assumption.
 Qed.
 
+(* This lemma shows subject reduction for the source calculus, based
+   on the types of the terms' translations. *)
 Lemma source_subj_red e f t :
-  has_type (translation e) t -> source_calculus.full_step e f -> has_type (translation f) t.
+  has_type (translation e) t ->
+  source_calculus.full_step e f ->
+  has_type (translation f) t.
 Proof.
   intros. edestruct (simulation e f) as [u []] ; auto.
-  assert (has_type u t) as Hu by eauto using subj_red_star.
-  eapply eta_type.
-  - apply Hu.
-  - assumption.
+  assert (has_type u t) by eauto using subj_red_star.
+  eapply eta_type ; eassumption.
 Qed.
 
 Lemma source_subj_red_star e f t :
