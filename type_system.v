@@ -1,8 +1,18 @@
+(* In this final module, we define the minimum necessary qualities
+   a type system (for the target calculus) needs to be able to
+   ensure non-interference with our translation. *)
+
 Require Import source_calculus.
 Require Import target_calculus.
 Require Import translation.
 Require Import labels.
 Require Import Autosubst.
+
+(* Following Pottier & Conchon, rather than define a particular
+   type system, we simply call for a typing predicate defined over
+   closed terms of the target calculus and an almost entirely
+   abstract set of types that satisfies particular axioms. We encode
+   this specification a typeclass. *)
 
 Class TypeSystem
     (type : Type)

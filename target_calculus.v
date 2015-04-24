@@ -97,7 +97,6 @@ Qed.
    the following lemmas are simply for convenience when working with
    it. *)
 
-
 (* steps can be lifted into one step reduction sequences *)
 Lemma star_step s t :
   s → t -> s →* t.
@@ -173,25 +172,9 @@ Proof.
   apply let_star_r, H0.
 Qed.
 
-
-(*Inductive isValue : term -> Prop :=
-| const_value k : isValue (Const k)
-| abs_value s : isValue (Abs s)
-| fst_value : isValue Fst
-| snd_value : isValue Snd
-| label_value l : isValue (Label l)
-| join_value : isValue Join.
-
-Inductive is_subexpr : term -> term -> Prop :=
-| Sub_abs s : is_subexpr s (Abs s)
-| Sub_app_l s t : is_subexpr s (App s t)
-| Sub_app_r s t : is_subexpr t (App s t)
-| Sub_let_l s t : is_subexpr s (Let s t)
-| Sub_let_r s t : is_subexpr t (Let s t)
-| Sub_pair_l s t : is_subexpr s (Pair s t)
-| Sub_pair_r s t : is_subexpr t (Pair s t)
-| Sub_trans s t u : is_subexpr s t -> is_subexpr t u -> is_subexpr s u.
-
+(* Because the type system will operate over closed terms of
+   the target calculus, we need a way to talk about closedness.
+   This approach is identical to that used in the source calculus. *)
 
 Inductive n_closed (n : nat) : term -> Prop :=
 | ConstClosed k : n_closed n (Const k)
@@ -207,20 +190,26 @@ Inductive n_closed (n : nat) : term -> Prop :=
 
 Definition is_closed := n_closed 0.
 
-Lemma n_close_S s n :
-  n_closed n s -> n_closed (S n) s.
-Proof.
-  intros. revert n H. induction s ; intros ; ainv ; constructor ; auto.
-Qed.
+(* A key axiom necessary to type the target calculus is
+   compositionality - a closed subexpression of a well-typed term
+   is also well-typed. The following predicate is thus necessary
+   to formalize the notion of a subexpression. *)
 
-Lemma close_up s n :
-  n_closed n s -> forall m, n <= m -> n_closed m s.
-Proof.
-  intros. induction m.
-  - ainv.
-  - ainv. now apply n_close_S, IHm.
-Qed.
+Inductive is_subexpr : term -> term -> Prop :=
+| Sub_abs s : is_subexpr s (Abs s)
+| Sub_app_l s t : is_subexpr s (App s t)
+| Sub_app_r s t : is_subexpr t (App s t)
+| Sub_let_l s t : is_subexpr s (Let s t)
+| Sub_let_r s t : is_subexpr t (Let s t)
+| Sub_pair_l s t : is_subexpr s (Pair s t)
+| Sub_pair_r s t : is_subexpr t (Pair s t)
+| Sub_trans s t u :
+    is_subexpr s t -> is_subexpr t u -> is_subexpr s u.
 
+(* Another crucial type system axiom is progress - a term either
+   is CBN-reducible or is a value. We formalize these notions below.
+   Note that the CBN step relation is similar to the full step
+   relation above in how extends the base step relation. *)
 
 Inductive cbn : term -> term -> Prop :=
 | CBN_step s t :
@@ -245,6 +234,30 @@ Inductive is_value : term -> Prop :=
 | Value_label l : is_value (Label l)
 | Value_join : is_value Join
 | Value_join_label l : is_value (App Join (Label l)).
+
+(*Inductive isValue : term -> Prop :=
+| const_value k : isValue (Const k)
+| abs_value s : isValue (Abs s)
+| fst_value : isValue Fst
+| snd_value : isValue Snd
+| label_value l : isValue (Label l)
+| join_value : isValue Join.
+
+Lemma n_close_S s n :
+  n_closed n s -> n_closed (S n) s.
+Proof.
+  intros. revert n H. induction s ; intros ; ainv ; constructor ; auto.
+Qed.
+
+Lemma close_up s n :
+  n_closed n s -> forall m, n <= m -> n_closed m s.
+Proof.
+  intros. induction m.
+  - ainv.
+  - ainv. now apply n_close_S, IHm.
+Qed.
+
+
 *)
 
 End TargetCalculus.
