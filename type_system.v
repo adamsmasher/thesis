@@ -120,32 +120,31 @@ Proof.
 Qed.
 
 Lemma eta_fst_trans e t :
-  is_term e ->
   source_calculus.is_closed e ->
   has_type (translation e) t ->
   exists u, has_type (eta_fst (translation e)) u.
 Proof.
-  induction e ; simpl ; intros ; ainv.
+  intros H H0. induction e ; simpl ; ainv.
   - exists int. apply integers ; eauto.
-  - apply pair_types in H1.
-    + destruct H1 as [u [v []]]. eauto.
+  - apply pair_types in H0.
+    + destruct H0 as [u [v []]]. eauto.
     + constructor ; auto using translation_closed.
     + constructor.
-  - apply pair_types in H1.
-    + destruct H1 as [u [v []]]. eauto.
+  - apply pair_types in H0.
+    + destruct H0 as [u [v []]]. eauto.
     + repeat constructor ;
         auto using translation_closed, translation_closed_fst.
     + repeat constructor ;
         auto using translation_closed, translation_closed_fst,
           translation_closed_snd.
-  - apply pair_types in H1.
-    + destruct H1 as [u [v []]]. eauto.
+  - apply pair_types in H0.
+    + destruct H0 as [u [v []]]. eauto.
     + repeat constructor ;
         auto using translation_closed, translation_closed_fst.
     + repeat constructor ;
         auto using translation_closed, translation_closed_snd.
-  - apply pair_types in H1.
-    + destruct H1 as [u [v []]]. eauto.
+  - apply pair_types in H0.
+    + destruct H0 as [u [v []]]. eauto.
     + now apply translation_closed_fst, translation_closed.
     + repeat constructor.
       now apply translation_closed_snd, translation_closed.
