@@ -475,8 +475,30 @@ Proof.
     + apply EtaEqPair ; eauto using eta_eq, eta_eq_fst, eta_eq_snd.
 Qed.
 
-(*
-Lemma translation_pair e :
+(* The following minor results, showing that translation preserves
+   closedness, are proven here and used while proving
+   non-interference. *)
+
+Lemma translation_closed_fst e n :
+  n_closed n e -> n_closed n (eta_fst e).
+Proof.
+  intros. destruct e ; ainv ; now repeat constructor.
+Qed.
+
+Lemma translation_closed_snd e n :
+  n_closed n e -> n_closed n (eta_snd e).
+Proof.
+  intros. destruct e ; ainv ; now repeat constructor.
+Qed.
+
+Lemma translation_closed e n :
+  source_calculus.n_closed n e -> n_closed n (translation e).
+Proof.
+  revert n. induction e ; ainv ; repeat constructor ;
+    auto using translation_closed_fst, translation_closed_snd.
+Qed.
+
+(*Lemma translation_pair e :
   is_term e -> (exists x, e = source_calculus.Var x /\ translation e = Var x) \/ (exists e1 e2, translation e = Pair e1 e2).
 Proof.
   intros. destruct e ; simpl.
@@ -487,68 +509,6 @@ Proof.
   - right. eauto.
   - right. eauto.
   - right. eauto.
-Qed.
-
-Lemma translation_closed_fst e n :
-  n_closed n e -> n_closed n (eta_fst e).
-Proof.
-  intros. destruct e ; simpl.
-  - repeat constructor.
-  - constructor.
-    + constructor.
-    + assumption.
-  - inversion H ; subst. repeat constructor ; auto.
-  - inversion H ; subst. repeat constructor ; auto.
-  - inversion H ; subst. repeat constructor ; auto.
-  - inversion H ; subst. auto.
-  - repeat constructor.
-  - repeat constructor.
-  - repeat constructor.
-  - repeat constructor.
-Qed.
-
-Lemma translation_closed_snd e n :
-  n_closed n e -> n_closed n (eta_snd e).
-Proof.
-  intros. destruct e ; simpl.
-  - repeat constructor.
-  - constructor.
-    + constructor.
-    + assumption.
-  - inversion H ; subst. repeat constructor ; auto.
-  - inversion H ; subst. repeat constructor ; auto.
-  - inversion H ; subst. repeat constructor ; auto.
-  - inversion H ; subst. auto.
-  - repeat constructor.
-  - repeat constructor.
-  - repeat constructor.
-  - repeat constructor.
-Qed.
-
-Lemma translation_closed e n :
-  source_calculus.n_closed n e -> n_closed n (translation e).
-Proof.
-  revert n. induction e ; simpl ; intros.
-  - repeat constructor.
-  - repeat constructor.
-  - constructor. ainv.
-  - ainv. constructor.
-    + constructor. now apply IHe.
-    + constructor.
-  - ainv. repeat constructor.
-    + apply translation_closed_fst. now apply IHe1.
-    + now apply IHe2.
-    + apply translation_closed_snd. now apply IHe1.
-    + apply translation_closed_fst. now apply IHe1.
-    + now apply IHe2.
-  - ainv. repeat constructor.
-    + now apply IHe.
-    + apply translation_closed_fst. now apply IHe0.
-    + now apply IHe.
-    + apply translation_closed_snd. now apply IHe0.
-  - ainv. repeat constructor.
-    + apply translation_closed_fst. now apply IHe.
-    + apply translation_closed_snd. now apply IHe.
-Qed.*)
+  Qed. *)
 
 End Translation.
