@@ -93,16 +93,26 @@ Proof.
   - apply IHstar. eapply source_subj_red ; eauto.
 Qed.
 
+(* The following two lemmas are straightforward corollaries of
+   compositionality, defined here for convenience *)
 Lemma pair_types e f t :
-  is_closed e -> is_closed f -> has_type (Pair e f) t -> exists u v, has_type e u /\ has_type f v.
+  is_closed e ->
+  is_closed f ->
+  has_type (Pair e f) t ->
+  exists u v, has_type e u /\ has_type f v.
 Proof.
   intros.
-  destruct (compositionality e (Pair e f) t) ; eauto using is_subexpr.
-  destruct (compositionality f (Pair e f) t) ; eauto using is_subexpr.
+  destruct (compositionality e (Pair e f) t) ;
+    eauto using is_subexpr.
+  destruct (compositionality f (Pair e f) t) ;
+    eauto using is_subexpr.
 Qed.
 
 Lemma app_types e f t :
-  is_closed e -> is_closed f -> has_type (App e f) t -> exists u v, has_type e u /\ has_type f v.
+  is_closed e ->
+  is_closed f ->
+  has_type (App e f) t ->
+  exists u v, has_type e u /\ has_type f v.
 Proof.
   intros.
   destruct (compositionality e (App e f) t) ; eauto using is_subexpr.
