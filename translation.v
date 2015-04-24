@@ -307,7 +307,7 @@ Lemma five_one e sigma :
   (eta_snd ⦇e⦈).[sigma >>> translation] →* eta_snd ⦇e.[sigma]⦈.
 Proof.
   revert sigma. induction e ; intros ; simpl ; ainv ; subst ;
-    repeat split ; eauto 10 using step, star.
+    repeat split ; eauto using step, star.
   - apply eta_fst_app.
   - apply eta_snd_app.
   - apply pair_star_l. rewrite ren_up. apply abs_star.
