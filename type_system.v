@@ -21,15 +21,25 @@ Class TypeSystem
     (int : type)
     (pair : type -> type -> type)
 := {
-  compositionality : forall e f t, is_closed e -> is_subexpr e f -> has_type f t -> exists u, has_type e u;
-  subj_red : forall e f t, has_type e t -> full_step e f -> has_type f t;
-  eta_type : forall e f t, has_type e t -> eta_eq e f -> has_type f t;
-  progress : forall e t, has_type e t -> (exists f, cbn e f) \/ is_value e;
+  compositionality : forall e f t,
+    is_closed e ->
+    is_subexpr e f ->
+    has_type f t ->
+    exists u, has_type e u;
+  subj_red : forall e f t,
+    has_type e t -> full_step e f -> has_type f t;
+  eta_type : forall e f t,
+    has_type e t -> eta_eq e f -> has_type f t;
+  progress : forall e t,
+    has_type e t -> (exists f, cbn e f) \/ is_value e;
   labels1 : forall l, has_type (Label l) (lift_label l);
-  labels2 : forall l m, has_type (Label l) (lift_label m) -> precedes l m;
+  labels2 : forall l m,
+    has_type (Label l) (lift_label m) -> precedes l m;
   integers : forall v, has_type v int <-> exists k, v = (Const k);
-  pairs1 : forall e f t u, has_type (Pair e f) (pair t u) -> has_type e t /\ has_type f u;
-  pairs2 : forall e f t u, has_type e t -> has_type f u -> exists v, has_type (Pair e f) v
+  pairs1 : forall e f t u,
+    has_type (Pair e f) (pair t u) -> has_type e t /\ has_type f u;
+  pairs2 : forall e f t u,
+    has_type e t -> has_type f u -> exists v, has_type (Pair e f) v
 }.
 
 Parameter type : Type.
