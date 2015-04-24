@@ -270,6 +270,12 @@ Proof.
   - apply eta_snd_full_step in H. eapply star_trans ; eauto.
 Qed.
 
+(* We next prove a series of lemmas concerning the relationship
+   between translation and substitution. They ultimately build
+   to subst_trans, which shows that a substitution can be
+   applied either before or after translation with similar results.
+   This becomes necessary when proving simulation. *)
+
 Lemma fst_ren s xi :
   ⦇s⦈.[ren xi] = ⦇s.[ren xi]⦈ ->
   (eta_fst ⦇s⦈).[ren xi] = eta_fst ⦇s.[ren xi]⦈.
@@ -300,7 +306,11 @@ Proof.
   autosubst.
 Qed.
 
-Lemma five_one e sigma :
+(* The key substitution-translation lemma. All three parts of it
+   need to be proven together to get a strong enough inductive
+   hypothesis. *)
+
+Lemma subst_trans e sigma :
   ⦇e⦈.[sigma >>> translation] →* ⦇e.[sigma]⦈ /\
   (eta_fst ⦇e⦈).[sigma >>> translation] →* eta_fst ⦇e.[sigma]⦈ /\
   (eta_snd ⦇e⦈).[sigma >>> translation] →* eta_snd ⦇e.[sigma]⦈.
@@ -353,7 +363,7 @@ Qed.
 (* This lemma weakens the above lemma for the case of a single
    variable substitution *)
 
-Lemma five_one' e1 e2 :
+Lemma subst_trans' e1 e2 :
   ⦇e1⦈.[⦇e2⦈/] →* ⦇e1.[e2/]⦈ /\
   (eta_fst ⦇e1⦈).[⦇e2⦈/] →* eta_fst ⦇e1.[e2/]⦈ /\
   (eta_snd ⦇e1⦈).[⦇e2⦈/] →* eta_snd ⦇e1.[e2/]⦈.
@@ -364,21 +374,21 @@ Proof.
     { split ; auto.
       repeat f_equal ; f_ext ; intros ; destruct x ; auto.
     }
-    destruct H1. autorew. now apply five_one.
+    destruct H1. autorew. now apply subst_trans.
   - assert ((eta_fst ⦇e1⦈).[⦇e2⦈/] =
             (eta_fst ⦇e1⦈).[(e2 .: ids) >>> translation]
          /\ eta_fst ⦇e1.[e2/]⦈ = eta_fst ⦇e1.[e2 .: ids]⦈) as H1.
     { split ; auto.
       repeat f_equal ; f_ext ; intros ; destruct x ; auto.
     }
-    destruct H1. autorew. now apply five_one.
+    destruct H1. autorew. now apply subst_trans.
   - assert ((eta_snd ⦇e1⦈).[⦇e2⦈/] =
             (eta_snd ⦇e1⦈).[(e2 .: ids) >>> translation]
          /\ eta_snd ⦇e1.[e2/]⦈ = eta_snd ⦇e1.[e2 .: ids]⦈) as H1.
     { split ; auto.
       repeat f_equal ; f_ext ; intros ; destruct x ; auto.
     }
-    destruct H1. autorew. now apply five_one.
+    destruct H1. autorew. now apply subst_trans.
 Qed.
 
 (* To simplify the proof of simuation, we've split it up into
@@ -396,9 +406,9 @@ Proof.
       * apply star_step, FullStep_step, Step_neutral.
     + eapply star_trans.
        * apply pair_star.
-         { apply app_star_r. now apply five_one'. }
+         { apply app_star_r. now apply subst_trans'. }
          { apply app_star_r. apply star_step, FullStep_step, Step_beta. }
-       * apply pair_star_r. apply app_star_r. now apply five_one'.
+       * apply pair_star_r. apply app_star_r. now apply subst_trans'.
   - apply EtaEqEta.
 Qed.
 
@@ -408,7 +418,7 @@ Proof.
   simpl. repeat esplit.
   - eapply star_trans.
     + apply pair_star ; apply star_step, FullStep_step, Step_let.
-    + apply pair_star ; now apply five_one'.
+    + apply pair_star ; now apply subst_trans'.
   - apply eta_pair.
 Qed.
 
