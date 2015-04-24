@@ -441,7 +441,7 @@ Proof.
   - now apply simulation_label.
 Qed.
 
-Lemma simulation (e f : source_calculus.prefix) :
+Theorem simulation (e f : source_calculus.prefix) :
   e → f -> exists u, ⦇e⦈  →* u /\ eta_eq u ⦇f⦈.
 Proof.
   induction 1 ; ainv ; simpl.
