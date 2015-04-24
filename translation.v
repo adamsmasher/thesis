@@ -349,27 +349,36 @@ Proof.
   - apply app_star_r. now apply IHe.
 Qed.
 
+(* TODO: is this lemma necessary? *)
+(* This lemma weakens the above lemma for the case of a single
+   variable substitution *)
+
 Lemma five_one' e1 e2 :
   ⦇e1⦈.[⦇e2⦈/] →* ⦇e1.[e2/]⦈ /\
   (eta_fst ⦇e1⦈).[⦇e2⦈/] →* eta_fst ⦇e1.[e2/]⦈ /\
   (eta_snd ⦇e1⦈).[⦇e2⦈/] →* eta_snd ⦇e1.[e2/]⦈.
 Proof.
   intros. repeat split.
-  - assert (exists sigma, ⦇e1⦈.[⦇e2⦈/] = ⦇e1⦈.[sigma >>> translation] /\ ⦇e1.[e2/]⦈ = ⦇e1.[sigma]⦈) as H1.
-    { exists (e2 .: ids). split ; auto.
+  - assert (⦇e1⦈.[⦇e2⦈/] = ⦇e1⦈.[(e2 .: ids) >>> translation]
+         /\ ⦇e1.[e2/]⦈ = ⦇e1.[e2 .: ids]⦈) as H1.
+    { split ; auto.
       repeat f_equal ; f_ext ; intros ; destruct x ; auto.
     }
-    destruct H1 as [sigma []]. autorew. now apply five_one.
-  - assert (exists sigma, (eta_fst ⦇e1⦈).[⦇e2⦈/] = (eta_fst ⦇e1⦈).[sigma >>> translation] /\ eta_fst ⦇e1.[e2/]⦈ = eta_fst ⦇e1.[sigma]⦈) as H1.
-    { exists (e2 .: ids). split ; auto.
+    destruct H1. autorew. now apply five_one.
+  - assert ((eta_fst ⦇e1⦈).[⦇e2⦈/] =
+            (eta_fst ⦇e1⦈).[(e2 .: ids) >>> translation]
+         /\ eta_fst ⦇e1.[e2/]⦈ = eta_fst ⦇e1.[e2 .: ids]⦈) as H1.
+    { split ; auto.
       repeat f_equal ; f_ext ; intros ; destruct x ; auto.
     }
-    destruct H1 as [sigma []]. autorew. now apply five_one.
-  - assert (exists sigma, (eta_snd ⦇e1⦈).[⦇e2⦈/] = (eta_snd ⦇e1⦈).[sigma >>> translation] /\ eta_snd ⦇e1.[e2/]⦈ = eta_snd ⦇e1.[sigma]⦈) as H1.
-    { exists (e2 .: ids). split ; auto.
+    destruct H1. autorew. now apply five_one.
+  - assert ((eta_snd ⦇e1⦈).[⦇e2⦈/] =
+            (eta_snd ⦇e1⦈).[(e2 .: ids) >>> translation]
+         /\ eta_snd ⦇e1.[e2/]⦈ = eta_snd ⦇e1.[e2 .: ids]⦈) as H1.
+    { split ; auto.
       repeat f_equal ; f_ext ; intros ; destruct x ; auto.
     }
-    destruct H1 as [sigma []]. autorew. now apply five_one.
+    destruct H1. autorew. now apply five_one.
 Qed.
 
 (* To simplify the proof of simuation, we've split it up into
