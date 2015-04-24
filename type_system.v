@@ -42,6 +42,8 @@ Class TypeSystem
     has_type e t -> has_type f u -> exists v, has_type (Pair e f) v
 }.
 
+(* For the remainder of this section, we assume we have a valid
+   type system and show properties of it. *)
 Parameter type : Type.
 Parameter has_type : term -> type  -> Prop.
 Parameter lift_label : label -> type.
@@ -49,6 +51,15 @@ Parameter int : type.
 Parameter pair : type -> type -> type.
 Parameter TS : TypeSystem type has_type lift_label int pair.
 
+(* Our primary goal is showing that any type system satisfying the
+   above axioms can be used to enforce non-interference in the
+   source calculus - that is, we can translate a source calculus
+   term and the type of the translated term will tell us the labels
+   of the data that the term depends on. As per usual, this key
+   theorem will require a number of lemmas. *)
+
+(* This lemma extends subject reduction from a single step to
+   full sequences. *)
 Lemma subj_red_star e f t :
   has_type e t -> star e f -> has_type f t.
 Proof.
