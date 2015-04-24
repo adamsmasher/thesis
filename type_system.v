@@ -71,7 +71,7 @@ Proof.
 Qed.
 
 Lemma source_subj_red e f t :
-  is_term e -> is_term f -> has_type (translation e) t -> source_calculus.full_step e f -> has_type (translation f) t.
+  has_type (translation e) t -> source_calculus.full_step e f -> has_type (translation f) t.
 Proof.
   intros. edestruct (simulation e f) as [u []] ; auto.
   assert (has_type u t) as Hu by eauto using subj_red_star.
