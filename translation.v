@@ -350,8 +350,6 @@ Proof.
 Qed.
 
 Lemma five_one' e1 e2 :
-  is_term e1 ->
-  is_term e2 ->
   ⦇e1⦈.[⦇e2⦈/] →* ⦇e1.[e2/]⦈ /\
   (eta_fst ⦇e1⦈).[⦇e2⦈/] →* eta_fst ⦇e1.[e2/]⦈ /\
   (eta_snd ⦇e1⦈).[⦇e2⦈/] →* eta_snd ⦇e1.[e2/]⦈.
@@ -378,8 +376,6 @@ Qed.
    separate lemmas for each case of the step relation. *)
 
 Lemma simulation_beta s t :
-  is_term s ->
-  is_term t ->
   exists u,
   ⦇source_calculus.App (source_calculus.Abs s) t⦈ →* u /\
   eta_eq u ⦇s.[t/]⦈.
@@ -398,11 +394,7 @@ Proof.
 Qed.
 
 Lemma simulation_let s t :
-  is_term s ->
-  is_term t ->
-  exists u,
-  ⦇source_calculus.Let s t⦈ →* u /\
-  eta_eq u ⦇t.[s/]⦈.
+  exists u, ⦇source_calculus.Let s t⦈ →* u /\ eta_eq u ⦇t.[s/]⦈.
 Proof.
   simpl. repeat esplit.
   - eapply star_trans.
@@ -422,48 +414,42 @@ Proof.
 Qed.
 
 Lemma simulation_step (e f : source_calculus.prefix) :
-  is_term e ->
-  is_term f ->
-  source_calculus.step e f ->
-  exists u, ⦇e⦈ →* u /\ eta_eq u ⦇f⦈.
+  source_calculus.step e f -> exists u, ⦇e⦈ →* u /\ eta_eq u ⦇f⦈.
 Proof.
-  destruct 3 ; ainv.
+  destruct 1 ; ainv.
   - now apply simulation_beta.
   - now apply simulation_let.
   - now apply simulation_label.
 Qed.
 
 Lemma simulation (e f : source_calculus.prefix) :
-  is_term e ->
-  is_term f ->
-  e → f ->
-  exists u, ⦇e⦈  →* u /\ eta_eq u ⦇f⦈.
+  e → f -> exists u, ⦇e⦈  →* u /\ eta_eq u ⦇f⦈.
 Proof.
-  induction 3 ; ainv ; simpl.
+  induction 1 ; ainv ; simpl.
   - now apply simulation_step.
-  - destruct IHfull_step as [x []]; auto. repeat esplit.
+  - repeat esplit.
     + apply pair_star_l, abs_star. eassumption.
     + eauto using eta_eq.
-  - destruct IHfull_step as [x []]; auto. repeat esplit.
+  - repeat esplit.
     + apply pair_star.
-       * apply app_star_r, app_star_l. apply eta_fst_star. eassumption.
-       * apply app_star.
-          { apply app_star_r. apply eta_snd_star. eassumption. }
-          { apply app_star_r, app_star_l. apply eta_fst_star. eassumption. }
+      * apply app_star_r, app_star_l. apply eta_fst_star. eassumption.
+      * apply app_star.
+        { apply app_star_r. apply eta_snd_star. eassumption. }
+        { apply app_star_r, app_star_l. apply eta_fst_star. eassumption. }
     + apply EtaEqPair ; eauto 7 using eta_eq, eta_eq_fst, eta_eq_snd.
-  - destruct IHfull_step as [x []]; auto. repeat esplit. apply pair_star.
+  - repeat esplit. apply pair_star.
     + apply app_star_r, app_star_r. eassumption.
     + apply app_star_r, app_star_r, app_star_r. eassumption.
     + apply EtaEqPair ; eauto using eta_eq.
-  - destruct IHfull_step as [x []] ; auto. repeat esplit.
+  - repeat esplit.
     + apply pair_star ; apply let_star_l ; eassumption.
     + apply EtaEqPair ; eauto using eta_eq.
-  - destruct IHfull_step as [x []] ; auto. repeat esplit.
+  - repeat esplit.
     + apply pair_star.
        * apply let_star_r. apply eta_fst_star. eassumption.
        * apply let_star_r. apply eta_snd_star. eassumption.
     + apply EtaEqPair ; eauto using eta_eq, eta_eq_fst, eta_eq_snd.
-  - destruct IHfull_step as [x []] ; auto. repeat esplit.
+  - repeat esplit.
     + apply pair_star.
        * apply eta_fst_star. eassumption.
        * apply app_star_r. apply eta_snd_star. eassumption.
