@@ -301,7 +301,6 @@ Proof.
 Qed.
 
 Lemma five_one e sigma :
-  is_term e ->
   ⦇e⦈.[sigma >>> translation] →* ⦇e.[sigma]⦈ /\
   (eta_fst ⦇e⦈).[sigma >>> translation] →* eta_fst ⦇e.[sigma]⦈ /\
   (eta_snd ⦇e⦈).[sigma >>> translation] →* eta_snd ⦇e.[sigma]⦈.
