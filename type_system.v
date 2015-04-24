@@ -82,19 +82,15 @@ Proof.
   eapply eta_type ; eassumption.
 Qed.
 
+(* And, as before, we extend it to the reflexive transitive closure *)
 Lemma source_subj_red_star e f t :
-  is_term e -> is_term f -> has_type (translation e) t -> source_calculus.star e f -> has_type (translation f) t.
+  has_type (translation e) t ->
+  source_calculus.star e f ->
+  has_type (translation f) t.
 Proof.
-  induction 4.
+  induction 2.
   - assumption.
-  - apply IHstar.
-    + eauto using term_full_step.
-    + assumption.
-    + eapply source_subj_red.
-        * apply H.
-        * eauto using term_full_step.
-        * assumption.
-        * assumption.
+  - apply IHstar. eapply source_subj_red ; eauto.
 Qed.
 
 Lemma pair_types e f t :
