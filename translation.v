@@ -63,7 +63,17 @@ end.
    with the first component containing the original datum and the
    second component containing the datum's label (using the
    semi-lattice join operation, we discard all but the highest
-   label associated with the datum). *)
+   label associated with the datum).
+
+   Note that, because translation is only defined for terms and not
+   prefixes, we also have to give a "nonsense" definition of
+   translation for holes. The particular choice happens to behave
+   rather nicely; later proofs involving translation often elide
+   an is_term condition on their proof statements because the proof
+   goes through anyway, whereas alternate definitions of translation
+   of holes may cause problems. However this can always be resolved
+   by inversion on an augmented is_term proof, so we choose to
+   "cheat" a bit to keep the proofs simpler where we can. *)
 
 Fixpoint translation (e : source_calculus.prefix) :
     target_calculus.term :=
