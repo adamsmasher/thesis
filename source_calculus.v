@@ -460,30 +460,54 @@ Inductive n_closed (n : nat) : prefix -> Prop :=
 
 Definition is_closed := n_closed 0.
 
-(* Definition term_subst sigma := forall (x : var), is_term (sigma x).
+(* The definition of values in our calculus is standard and taken
+   from section 6.1; it's necessary to specify non-interference. *)
 
+Inductive is_value : prefix -> Prop :=
+| Value_const k : is_value (Const k)
+| Value_abs e : is_value (Abs e)
+| Value_label l v : is_value v -> is_value (Label v l).
+
+(* The proof of non-interference will require a result called
+   term_star, which shows that reduction cannot introduce holes -
+   if a prefix is a term, it remains a term under reduction.
+   We prove this for single steps, and then for reduction
+   sequences; several preliminary lemmas concerning substitutions
+   are required as well. *)
+
+(* We say a substitution is subst_term if it does not introduce any
+   non-term prefixes. *)
+Definition subst_term sigma := forall (x : var), is_term (sigma x).
+
+(* All renamings have a similar property *)
 Lemma ren_term s r :
   is_term s -> is_term s.[ren r].
 Proof.
-  revert r. induction s ; intros ; asimpl ; ainv ; constructor ; auto.
+  revert r.
+  induction s ; intros ; asimpl ; ainv ; constructor ; auto.
 Qed.
 
-Lemma up_term_subst sigma :
-  term_subst sigma -> term_subst (up sigma).
+(* If a substitution is subst_term, applying the up operator to it
+   preserves this property *)
+Lemma up_subst_term sigma :
+  subst_term sigma -> subst_term (up sigma).
 Proof.
-  intros. intro x. destruct x ; asimpl.
+  intros H x. destruct x ; asimpl.
   - constructor.
   - apply ren_term, H.
 Qed.
 
+(* Applying a subst_term substitution to a term results in a term *)
 Lemma term_repl s sigma :
-  is_term s -> term_subst sigma -> is_term s.[sigma].
+  is_term s -> subst_term sigma -> is_term s.[sigma].
 Proof.
-  revert sigma. induction s ; intros ; simpl ; ainv ; auto using is_term, up_term_subst.
+  revert sigma. induction s ; intros ; simpl ; ainv ;
+    auto using is_term, up_subst_term.
 Qed.
 
-Lemma scons_term_subst t :
-  is_term t -> term_subst (t .: ids).
+(* a single variable substitution is subst_term *)
+Lemma scons_subst_term t :
+  is_term t -> subst_term (t .: ids).
 Proof.
   intros. intro x. destruct x ; simpl.
   - assumption.
@@ -494,8 +518,8 @@ Lemma term_step e f :
   is_term e -> step e f -> is_term f.
 Proof.
   induction 2 ; ainv.
-  - apply term_repl ; auto using scons_term_subst.
-  - apply term_repl ; auto using scons_term_subst.
+  - apply term_repl ; auto using scons_subst_term.
+  - apply term_repl ; auto using scons_subst_term.
   - repeat constructor ; auto.
 Qed.
 
@@ -518,6 +542,7 @@ Proof.
   induction 2 ; eauto using term_full_step.
 Qed.
 
+(*
 (* Our definition of call-by-need is standard; it is taken directly
    from section 6.1 of the Pottier & Conchon paper *)
 
@@ -526,13 +551,6 @@ Inductive cbn : prefix -> prefix -> Prop :=
 | CBN_app s s' t : cbn s s' -> cbn (App s t) (App s' t)
 | CBN_label s s' l : cbn s s' -> cbn (Label s l) (Label s' l).
 
-(* The definition of values in our calculus is again standard
-   and taken from section 6.1 *)
-
-Inductive is_value : prefix -> Prop :=
-| Value_const k : is_value (Const k)
-| Value_abs e : is_value (Abs e)
-| Value_label l v : is_value v -> is_value (Label v l).
 
 Lemma match_trans (e1 e2 e3 : prefix) :
   e1 ⪯ e2 -> e2 ⪯ e3 -> e1 ⪯ e3.
