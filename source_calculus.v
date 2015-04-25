@@ -461,12 +461,22 @@ Inductive n_closed (n : nat) : prefix -> Prop :=
 Definition is_closed := n_closed 0.
 
 (* The definition of values in our calculus is standard and taken
-   from section 6.1; it's necessary to specify non-interference. *)
+   from section 6.1; it's necessary to specify non-interference
+   and progress *)
 
 Inductive is_value : prefix -> Prop :=
 | Value_const k : is_value (Const k)
 | Value_abs e : is_value (Abs e)
 | Value_label l v : is_value v -> is_value (Label v l).
+
+(* Our definition of call-by-need is again standard and taken
+   from section 6.1 of the Pottier & Conchon paper. We'll need to
+   define CBN to talk about progress. *)
+
+Inductive cbn : prefix -> prefix -> Prop :=
+| CBN_step s t : step s t -> cbn s t
+| CBN_app s s' t : cbn s s' -> cbn (App s t) (App s' t)
+| CBN_label s s' l : cbn s s' -> cbn (Label s l) (Label s' l).
 
 (* The proof of non-interference will require a result called
    term_star, which shows that reduction cannot introduce holes -
@@ -542,14 +552,8 @@ Proof.
   induction 2 ; eauto using term_full_step.
 Qed.
 
-(*
-(* Our definition of call-by-need is standard; it is taken directly
-   from section 6.1 of the Pottier & Conchon paper *)
 
-Inductive cbn : prefix -> prefix -> Prop :=
-| CBN_step s t : step s t -> cbn s t
-| CBN_app s s' t : cbn s s' -> cbn (App s t) (App s' t)
-| CBN_label s s' l : cbn s s' -> cbn (Label s l) (Label s' l).
+(*
 
 
 Lemma match_trans (e1 e2 e3 : prefix) :
