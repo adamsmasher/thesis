@@ -77,9 +77,9 @@ Qed.
 (* This lemma shows subject reduction for the source calculus, based
    on the types of the terms' translations. *)
 Theorem source_subj_red e f t :
-  has_type (translation e) t ->
+  has_type ⦇e⦈ t ->
   source_calculus.full_step e f ->
-  has_type (translation f) t.
+  has_type ⦇f⦈ t.
 Proof.
   intros. edestruct (simulation e f) as [u []] ; auto.
   assert (has_type u t) by eauto using subj_red_star.
@@ -89,9 +89,9 @@ Qed.
 (* And, as before, we extend it to the reflexive transitive closure,
    completing our proof of preservation.*)
 Lemma source_subj_red_star e f t :
-  has_type (translation e) t ->
+  has_type ⦇e⦈ t ->
   source_calculus.star e f ->
-  has_type (translation f) t.
+  has_type ⦇f⦈ t.
 Proof.
   induction 2.
   - assumption.
@@ -132,9 +132,9 @@ Qed.
    are well typed, the translation is well-typed. *)
 Lemma translate_etas e t u  :
   source_calculus.is_closed e ->
-  has_type (eta_fst (translation e)) t ->
-  has_type (eta_snd (translation e)) u ->
-  exists v, has_type (translation e) v.
+  has_type (eta_fst ⦇e⦈) t ->
+  has_type (eta_snd ⦇e⦈) u ->
+  exists v, has_type ⦇e⦈ v.
 Proof.
   induction e ; simpl ; ainv ; eauto using pairs2, labels1.
 Qed.
@@ -153,7 +153,7 @@ Proof.
 Qed.
 
 Lemma translation_appliable s t u :
-  cbn (App (eta_fst (translation s)) t) u ->
+  cbn (App (eta_fst ⦇s⦈) t) u ->
   source_calculus.is_value s ->
   appliable s.
 Proof.
@@ -164,14 +164,14 @@ Proof.
 Qed.
 
 Lemma app_translation_val e1 e2 :
-  ~is_value (App (eta_fst (translation e1)) (translation e2)).
+  ~is_value (App (eta_fst ⦇e1⦈) ⦇e2⦈).
 Proof.
   intro. induction e1 ; ainv.
   apply IHe1. rewrite <- H1, <- H0. constructor.
 Qed.
 
 Lemma source_progress e t (Hterm : is_term e) (Hclosed : source_calculus.is_closed e) :
-  has_type (translation e) t -> (exists f, source_calculus.cbn e f) \/ source_calculus.is_value e.
+  has_type ⦇e⦈ t -> (exists f, source_calculus.cbn e f) \/ source_calculus.is_value e.
 Proof.
   revert t. induction e ; simpl ; intros.
   - inversion Hterm.
@@ -182,7 +182,7 @@ Proof.
     apply pair_types in H. repeat destruct H. apply app_types in H. repeat destruct H.
     apply app_types in H1. repeat destruct H1. apply app_types in H0. repeat destruct H0.
     apply app_types in H0. repeat destruct H0.
-    + assert (exists u, has_type (translation e1) u) by eauto using translate_etas.
+    + assert (exists u, has_type ⦇e1⦈ u) by eauto using translate_etas.
        destruct H9. edestruct IHe1 ; eauto.
        * destruct H10. left. eauto using source_calculus.cbn.
        * apply app_types in H7. repeat destruct H7. apply progress in H11. destruct H11.
@@ -209,7 +209,7 @@ Proof.
   - left. esplit. repeat constructor.
   - ainv.
     apply pair_types in H. repeat destruct H. apply app_types in H0. repeat destruct H0.
-    + assert (exists u, has_type (translation e) u) by eauto using translate_etas.
+    + assert (exists u, has_type ⦇e⦈ u) by eauto using translate_etas.
        destruct H4. edestruct IHe ; eauto.
        * destruct H5. left. eauto using source_calculus.cbn.
        * right. now constructor.
@@ -245,7 +245,7 @@ end.
 *)
 Lemma int_value_fst (v : prefix) :
   source_calculus.is_value v ->
-  has_type (eta_fst (translation v)) int ->
+  has_type (eta_fst ⦇v⦈) int ->
   exists ls k, v = apply_labels ls (source_calculus.Const k).
 Proof.
   induction v ; simpl ; intros H H0 ; ainv.
@@ -257,8 +257,8 @@ Qed.
 
 Lemma int_trans_fst_type (v : prefix) l :
   source_calculus.is_value v ->
-  has_type (translation v) (pair int l) ->
-  has_type (eta_fst (translation v)) int.
+  has_type ⦇v⦈ (pair int l) ->
+  has_type (eta_fst ⦇v⦈) int.
 Proof.
   destruct v ; simpl ; intros ; ainv.
   - apply integers ; eauto.
@@ -268,7 +268,7 @@ Qed.
 
 Lemma int_value (v : prefix) l :
   source_calculus.is_value v ->
-  has_type (translation v) (pair int l) ->
+  has_type ⦇v⦈ (pair int l) ->
   exists ls k, v = apply_labels ls (source_calculus.Const k).
 Proof.
   intros. apply int_value_fst.
@@ -331,7 +331,7 @@ Proof.
 Qed.
 
 Lemma int_value_translation v ls k :
-  v = apply_labels ls (source_calculus.Const k) -> translation v = Pair (Const k) (lift_labels ls).
+  v = apply_labels ls (source_calculus.Const k) -> ⦇v⦈ = Pair (Const k) (lift_labels ls).
 Proof.
   revert ls. induction v ; intros ; destruct ls ; ainv.
   simpl. now erewrite IHv ; auto.
@@ -340,14 +340,14 @@ Qed.
 
 Theorem non_interference (e v : source_calculus.prefix) (l : label) :
   is_term e ->
-  has_type (translation e) (pair int (lift_label l)) ->
+  has_type ⦇e⦈ (pair int (lift_label l)) ->
   source_calculus.star e v ->
   source_calculus.is_value v ->
   source_calculus.star (label_filter (↓l) e) v.
 Proof.
   intros. assert (is_term v) by eauto using term_star.
   apply stability ; try assumption.
-  assert (has_type (translation v) (pair int (lift_label l))) by eauto using source_subj_red_star.
+  assert (has_type ⦇v⦈ (pair int (lift_label l))) by eauto using source_subj_red_star.
   assert (exists ls k, v = apply_labels ls (source_calculus.Const k)) by eauto using int_value.
   destruct H5 ; destruct H5. rewrite H5.
   apply filter_list_const. apply label_list_thing.
