@@ -512,3 +512,6 @@ Proof.
   Qed. *)
 
 End Translation.
+
+(* Export this notation *)
+Notation "⦇ e ⦈" := (translation e).

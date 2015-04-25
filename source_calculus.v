@@ -566,3 +566,6 @@ Proof.
 Qed.*)
 
 End SourceCalculus.
+
+(* Export this notation *)
+Notation "⌊ e ⌋ p" := (label_filter p e) (at level 70).
