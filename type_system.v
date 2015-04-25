@@ -58,6 +58,10 @@ Parameter TS : TypeSystem type has_type lift_label int pair.
    that is, programs whose translation is well-typed do not go wrong.
 *)
 
+(* Preservation is fairly straightforward to show, falling almost
+   immediately out of preservation of the target calculus and
+   simulation. *)
+
 (* This lemma extends subject reduction from a single step to
    full sequences. *)
 Lemma subj_red_star e f t :
@@ -94,6 +98,8 @@ Proof.
   - apply IHstar. eapply source_subj_red ; eauto.
 Qed.
 
+(* Progress, the proof of which follows, requires considerably
+   more groundwork. *)
 
 (* The following two lemmas are straightforward corollaries of
    compositionality, defined here for convenience when proving
