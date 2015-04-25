@@ -93,6 +93,24 @@ Proof.
   - apply IHstar. eapply source_subj_red ; eauto.
 Qed.
 
+Theorem non_interference (e v : source_calculus.prefix) (l : label) :
+  is_term e ->
+  has_type (translation e) (pair int (lift_label l)) ->
+  source_calculus.star e v ->
+  source_calculus.is_value v ->
+  source_calculus.star (label_filter (cone l) e) v.
+Proof.
+  intros. assert (is_term v) by eauto using term_star.
+  apply stability ; try assumption.
+  assert (has_type (translation v) (pair int (lift_label l))) by eauto using source_subj_red_star.
+  assert (exists ls k, v = apply_label_seq ls (source_calculus.Const k)) by eauto using int_value.
+  destruct H5 ; destruct H5. rewrite H5.
+  apply filter_list_const. apply label_list_thing.
+  apply int_value_translation in H5. rewrite H5 in H4.
+  apply pairs1 in H4. destruct H4. apply H6.
+Qed.
+
+
 (* The following two lemmas are straightforward corollaries of
    compositionality, defined here for convenience *)
 Lemma pair_types e f t :
@@ -333,17 +351,4 @@ Proof.
        * reflexivity.
        * contradiction.
     + intros. apply H. simpl. rewrite H1. destruct (label_eq l0 l) ; auto.
-Qed.
-
-Lemma non_interference (e v : source_calculus.prefix) (l : label) :
-  is_term e -> has_type (translation e) (pair int (lift_label l)) -> source_calculus.star e v -> source_calculus.is_value v -> source_calculus.star (label_filter (cone l) e) v.
-Proof.
-  intros. assert (is_term v) by eauto using term_star.
-  apply stability ; try assumption.
-  assert (has_type (translation v) (pair int (lift_label l))) by eauto using source_subj_red_star.
-  assert (exists ls k, v = apply_label_seq ls (source_calculus.Const k)) by eauto using int_value.
-  destruct H5 ; destruct H5. rewrite H5.
-  apply filter_list_const. apply label_list_thing.
-  apply int_value_translation in H5. rewrite H5 in H4.
-  apply pairs1 in H4. destruct H4. apply H6.
 Qed.
