@@ -139,6 +139,10 @@ Proof.
   induction e ; simpl ; ainv ; eauto using pairs2, labels1.
 Qed.
 
+(* TODO: cite the private paper *)
+(* We say a term s is appliable precisely when (App s t) can make
+   CBN progress. From the definition of CBN, we see that this occurs
+   precisely when it's of the form l1 : l2 : ... : ln : λ. s'. *)
 Inductive appliable : prefix -> Prop :=
 | AppliableAbs s : appliable (source_calculus.Abs s)
 | AppliableLift s l :
@@ -152,6 +156,8 @@ Proof.
     eauto using source_calculus.cbn, source_calculus.step.
 Qed.
 
+(* If the first component of a value's translation makes progress
+   when applied, the value is appliable. *)
 Lemma translation_appliable s t u :
   cbn (App (eta_fst ⦇s⦈) t) u ->
   source_calculus.is_value s ->
