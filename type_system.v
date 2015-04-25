@@ -301,8 +301,8 @@ Proof.
   - reflexivity.
   - rewrite IHls.
     + unfold cone. destruct (precedes_dec l L) as [_|p] ; simpl.
-       * reflexivity.
-       * exfalso. apply p, H. simpl. tauto.
+      * reflexivity.
+      * exfalso. apply p, H. simpl. tauto.
     + intros. apply H. simpl. tauto.
 Qed.
 
