@@ -94,6 +94,74 @@ Proof.
   - apply IHstar. eapply source_subj_red ; eauto.
 Qed.
 
+
+(* The following two lemmas are straightforward corollaries of
+   compositionality, defined here for convenience when proving
+   progress. *)
+Lemma pair_types e f t :
+  is_closed e ->
+  is_closed f ->
+  has_type (Pair e f) t ->
+  exists u v, has_type e u /\ has_type f v.
+Proof.
+  intros.
+  destruct (compositionality e (Pair e f) t) ;
+    eauto using is_subexpr.
+  destruct (compositionality f (Pair e f) t) ;
+    eauto using is_subexpr.
+Qed.
+
+Lemma app_types e f t :
+  is_closed e ->
+  is_closed f ->
+  has_type (App e f) t ->
+  exists u v, has_type e u /\ has_type f v.
+Proof.
+  intros.
+  destruct (compositionality e (App e f) t) ; eauto using is_subexpr.
+  destruct (compositionality f (App e f) t) ; eauto using is_subexpr.
+Qed.
+
+Lemma translate_etas e t u (Hterm : is_term e) (Hclosed : source_calculus.is_closed e) :
+  has_type (eta_fst (translation e)) t -> has_type (eta_snd (translation e)) u -> exists v, has_type (translation e) v.
+Proof.
+  induction e ; simpl ; intros.
+  - inversion Hterm.
+  - eapply pairs2.
+    + eassumption.
+    + apply labels1.
+  - inversion Hclosed ; ainv.
+  - eapply pairs2 ; eauto using labels1.
+  - eapply pairs2 ; eauto.
+  - eapply pairs2 ; eauto.
+  - eapply pairs2 ; eauto.
+Qed.
+
+Inductive appliable : prefix -> Prop :=
+| AppliableAbs s : appliable (source_calculus.Abs s)
+| AppliableLift s l : appliable s -> appliable (source_calculus.Label s l).
+
+Lemma appliable_exist_cbn s t :
+  appliable s -> exists u, source_calculus.cbn (source_calculus.App s t) u.
+Proof.
+  intros. induction H ; eauto using source_calculus.cbn, source_calculus.step.
+Qed.
+
+Lemma translation_appliable s t u :
+  is_term s -> cbn (App (eta_fst (translation s)) t) u -> source_calculus.is_value s -> appliable s.
+Proof.
+  intros. induction s ; ainv.
+  - inversion H0 ; ainv.
+  - constructor.
+  - constructor. apply IHs ; auto.
+Qed.
+
+Lemma app_translation_reducible e1 e2 :
+  ~is_value (App (eta_fst (translation e1)) (translation e2)).
+Proof.
+  intro. induction e1 ; ainv. apply IHe1. rewrite <- H1.  rewrite <- H0. constructor.
+Qed.
+
 Lemma source_progress e t (Hterm : is_term e) (Hclosed : source_calculus.is_closed e) :
   has_type (translation e) t -> (exists f, source_calculus.cbn e f) \/ source_calculus.is_value e.
 Proof.
@@ -149,8 +217,6 @@ Qed.
    term and the type of the translated term will tell us the labels
    of the data that the term depends on. As per usual, this key
    theorem will require a number of auxillary lemmas. *)
-
-
 
 (* As part of the proof of non-interference, we need to talk about
    source calculus terms of the form l1 : l2 : ... : ln : s. The
