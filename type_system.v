@@ -128,44 +128,46 @@ Proof.
   destruct (compositionality f (App e f) t) ; eauto using is_subexpr.
 Qed.
 
-Lemma translate_etas e t u (Hterm : is_term e) (Hclosed : source_calculus.is_closed e) :
-  has_type (eta_fst (translation e)) t -> has_type (eta_snd (translation e)) u -> exists v, has_type (translation e) v.
+(* The following lemma shows that if both halves of a translation
+   are well typed, the translation is well-typed. *)
+Lemma translate_etas e t u  :
+  source_calculus.is_closed e ->
+  has_type (eta_fst (translation e)) t ->
+  has_type (eta_snd (translation e)) u ->
+  exists v, has_type (translation e) v.
 Proof.
-  induction e ; simpl ; intros.
-  - inversion Hterm.
-  - eapply pairs2.
-    + eassumption.
-    + apply labels1.
-  - inversion Hclosed ; ainv.
-  - eapply pairs2 ; eauto using labels1.
-  - eapply pairs2 ; eauto.
-  - eapply pairs2 ; eauto.
-  - eapply pairs2 ; eauto.
+  induction e ; simpl ; ainv ; eauto using pairs2, labels1.
 Qed.
 
 Inductive appliable : prefix -> Prop :=
 | AppliableAbs s : appliable (source_calculus.Abs s)
-| AppliableLift s l : appliable s -> appliable (source_calculus.Label s l).
+| AppliableLift s l :
+    appliable s -> appliable (source_calculus.Label s l).
 
 Lemma appliable_exist_cbn s t :
-  appliable s -> exists u, source_calculus.cbn (source_calculus.App s t) u.
+  appliable s ->
+  exists u, source_calculus.cbn (source_calculus.App s t) u.
 Proof.
-  intros. induction H ; eauto using source_calculus.cbn, source_calculus.step.
+  induction 1 ;
+    eauto using source_calculus.cbn, source_calculus.step.
 Qed.
 
 Lemma translation_appliable s t u :
-  is_term s -> cbn (App (eta_fst (translation s)) t) u -> source_calculus.is_value s -> appliable s.
+  cbn (App (eta_fst (translation s)) t) u ->
+  source_calculus.is_value s ->
+  appliable s.
 Proof.
-  intros. induction s ; ainv.
-  - inversion H0 ; ainv.
+  intro H. induction s ; ainv.
+  - inversion H ; ainv.
   - constructor.
   - constructor. apply IHs ; auto.
 Qed.
 
-Lemma app_translation_reducible e1 e2 :
+Lemma app_translation_val e1 e2 :
   ~is_value (App (eta_fst (translation e1)) (translation e2)).
 Proof.
-  intro. induction e1 ; ainv. apply IHe1. rewrite <- H1.  rewrite <- H0. constructor.
+  intro. induction e1 ; ainv.
+  apply IHe1. rewrite <- H1, <- H0. constructor.
 Qed.
 
 Lemma source_progress e t (Hterm : is_term e) (Hclosed : source_calculus.is_closed e) :
@@ -185,7 +187,7 @@ Proof.
        * destruct H10. left. eauto using source_calculus.cbn.
        * apply app_types in H7. repeat destruct H7. apply progress in H11. destruct H11.
        { destruct H11. left. apply appliable_exist_cbn. eapply translation_appliable ; eauto. }
-       { exfalso. eapply app_translation_reducible ; eassumption. }
+       { exfalso. eapply app_translation_val ; eassumption. }
        { constructor. }
        { constructor ; auto using translation_closed_fst, translation_closed. }
     + constructor.
@@ -295,15 +297,44 @@ Proof.
     + intros. apply H. simpl. tauto.
 Qed.
 
+(* lift_labels turns a list of labels into a target calculus
+   term of label joinings *)
+Fixpoint lift_labels (ls : list label) : term := match ls with
+| nil => Label bottom
+| cons l ls' => (Label l) @ (lift_labels ls')
+end.
+
+Lemma join_labels ls :
+  exists L, (star (lift_labels ls) (Label L)) /\ (forall l, In l ls -> precedes l L).
+Proof.
+  induction ls ; simpl.
+  - exists bottom. split.
+    + eauto using star.
+    + inversion 1.
+  - destruct IHls as [L [H0 H1]]. exists (join a L). split.
+    + eapply star_trans.
+       * apply app_star_r. eassumption.
+       * apply star_step, FullStep_step. constructor.
+    + intros. destruct (label_eq a l) ; subst ; ainv.
+       * apply semilattice.precedes_join.
+       * apply semilattice.precedes_join3. apply H1. tauto.
+Qed.
 
 Lemma label_list_thing ls L :
-  has_type (lift_label_seq ls) (lift_label L) ->
+  has_type (lift_labels ls) (lift_label L) ->
   forall l, (In l ls -> precedes l L).
 Proof.
-  destruct (join_label_list ls) as [L' [H1 H2]]. intro Htype.
+  destruct (join_labels ls) as [L' [H1 H2]]. intro Htype.
   assert (has_type (Label L') (lift_label L)) by eauto using subj_red_star.
   assert (precedes L' L) by auto using labels2.
   intros. apply poset.transitivity with (b := L') ; auto.
+Qed.
+
+Lemma int_value_translation v ls k :
+  v = apply_labels ls (source_calculus.Const k) -> translation v = Pair (Const k) (lift_labels ls).
+Proof.
+  revert ls. induction v ; intros ; destruct ls ; ainv.
+  simpl. now erewrite IHv ; auto.
 Qed.
 
 
@@ -322,139 +353,4 @@ Proof.
   apply filter_list_const. apply label_list_thing.
   apply int_value_translation in H5. rewrite H5 in H4.
   apply pairs1 in H4. destruct H4. apply H6.
-Qed.
-
-
-(* The following two lemmas are straightforward corollaries of
-   compositionality, defined here for convenience *)
-Lemma pair_types e f t :
-  is_closed e ->
-  is_closed f ->
-  has_type (Pair e f) t ->
-  exists u v, has_type e u /\ has_type f v.
-Proof.
-  intros.
-  destruct (compositionality e (Pair e f) t) ;
-    eauto using is_subexpr.
-  destruct (compositionality f (Pair e f) t) ;
-    eauto using is_subexpr.
-Qed.
-
-Lemma app_types e f t :
-  is_closed e ->
-  is_closed f ->
-  has_type (App e f) t ->
-  exists u v, has_type e u /\ has_type f v.
-Proof.
-  intros.
-  destruct (compositionality e (App e f) t) ; eauto using is_subexpr.
-  destruct (compositionality f (App e f) t) ; eauto using is_subexpr.
-Qed.
-
-Lemma eta_fst_trans e t :
-  source_calculus.is_closed e ->
-  has_type (translation e) t ->
-  exists u, has_type (eta_fst (translation e)) u.
-Proof.
-  intros H H0. induction e ; simpl ; ainv.
-  - exists int. apply integers ; eauto.
-  - apply pair_types in H0.
-    + destruct H0 as [u [v []]]. eauto.
-    + constructor ; auto using translation_closed.
-    + constructor.
-  - apply pair_types in H0.
-    + destruct H0 as [u [v []]]. eauto.
-    + repeat constructor ;
-        auto using translation_closed, translation_closed_fst.
-    + repeat constructor ;
-        auto using translation_closed, translation_closed_fst,
-          translation_closed_snd.
-  - apply pair_types in H0.
-    + destruct H0 as [u [v []]]. eauto.
-    + repeat constructor ;
-        auto using translation_closed, translation_closed_fst.
-    + repeat constructor ;
-        auto using translation_closed, translation_closed_snd.
-  - apply pair_types in H0.
-    + destruct H0 as [u [v []]]. eauto.
-    + now apply translation_closed_fst, translation_closed.
-    + repeat constructor.
-      now apply translation_closed_snd, translation_closed.
-Qed.
-
-Lemma translate_etas e t u (Hterm : is_term e) (Hclosed : source_calculus.is_closed e) :
-  has_type (eta_fst (translation e)) t -> has_type (eta_snd (translation e)) u -> exists v, has_type (translation e) v.
-Proof.
-  induction e ; simpl ; intros.
-  - inversion Hterm.
-  - eapply pairs2.
-    + eassumption.
-    + apply labels1.
-  - inversion Hclosed ; ainv.
-  - eapply pairs2 ; eauto using labels1.
-  - eapply pairs2 ; eauto.
-  - eapply pairs2 ; eauto.
-  - eapply pairs2 ; eauto.
-Qed.
-
-Inductive appliable : prefix -> Prop :=
-| AppliableAbs s : appliable (source_calculus.Abs s)
-| AppliableLift s l : appliable s -> appliable (source_calculus.Label s l).
-
-Lemma translation_appliable s t u :
-  is_term s -> cbn (App (eta_fst (translation s)) t) u -> source_calculus.is_value s -> appliable s.
-Proof.
-  intros. induction s ; ainv.
-  - inversion H0 ; ainv.
-  - constructor.
-  - constructor. apply IHs ; auto.
-Qed.
-
-Lemma appliable_exist_cbn s t :
-  appliable s -> exists u, source_calculus.cbn (source_calculus.App s t) u.
-Proof.
-  intros. induction H ; eauto using source_calculus.cbn, source_calculus.step.
-Qed.
-
-Lemma app_translation_reducible e1 e2 :
-  ~is_value (App (eta_fst (translation e1)) (translation e2)).
-Proof.
-  intro. induction e1 ; ainv. apply IHe1. rewrite <- H1.  rewrite <- H0. constructor.
-Qed.
-
-
-
-Fixpoint lift_label_seq (ls : label_seq) : term := match ls with
-| LabelSeqEmpty => Label bottom
-| LabelSeqCons l ls' => App (App Join (Label l)) (lift_label_seq ls')
-end.
-
-
-
-Lemma int_value_translation v ls k :
-  v = apply_label_seq ls (source_calculus.Const k) -> translation v = Pair (Const k) (lift_label_seq ls).
-Proof.
-  revert ls. induction v ; intros ; destruct ls ; ainv.
-  simpl. now erewrite IHv ; auto.
-Qed.
-
-Fixpoint member l ls := match ls with
-| LabelSeqEmpty => false
-| LabelSeqCons l' ls' => if label_eq l l' then true else member l ls'
-end.
-
-Lemma join_label_list ls :
-  exists L, (star (lift_label_seq ls) (Label L)) /\ (forall l, member l ls = true -> precedes l L).
-Proof.
-  induction ls ; simpl.
-  - exists bottom. split.
-    + eauto using star.
-    + inversion 1.
-  - destruct IHls as [L [H0 H1]]. exists (join l L). split.
-    + eapply star_trans.
-       * apply app_star_r. eassumption.
-       * apply star_step, FullStep_step. constructor.
-    + intros. destruct (label_eq l0 l) ; subst ; ainv.
-       * apply semilattice.precedes_join.
-       * apply semilattice.precedes_join3. apply H1, H2.
 Qed.

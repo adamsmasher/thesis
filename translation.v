@@ -508,19 +508,6 @@ Proof.
     auto using translation_closed_fst, translation_closed_snd.
 Qed.
 
-(*Lemma translation_pair e :
-  is_term e -> (exists x, e = source_calculus.Var x /\ translation e = Var x) \/ (exists e1 e2, translation e = Pair e1 e2).
-Proof.
-  intros. destruct e ; simpl.
-  - inversion H.
-  - right. eauto.
-  - left. eauto.
-  - right. eauto.
-  - right. eauto.
-  - right. eauto.
-  - right. eauto.
-  Qed. *)
-
 End Translation.
 
 (* Export this notation *)

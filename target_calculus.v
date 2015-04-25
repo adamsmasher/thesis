@@ -235,31 +235,6 @@ Inductive is_value : term -> Prop :=
 | Value_join : is_value Join
 | Value_join_label l : is_value (App Join (Label l)).
 
-(*Inductive isValue : term -> Prop :=
-| const_value k : isValue (Const k)
-| abs_value s : isValue (Abs s)
-| fst_value : isValue Fst
-| snd_value : isValue Snd
-| label_value l : isValue (Label l)
-| join_value : isValue Join.
-
-Lemma n_close_S s n :
-  n_closed n s -> n_closed (S n) s.
-Proof.
-  intros. revert n H. induction s ; intros ; ainv ; constructor ; auto.
-Qed.
-
-Lemma close_up s n :
-  n_closed n s -> forall m, n <= m -> n_closed m s.
-Proof.
-  intros. induction m.
-  - ainv.
-  - ainv. now apply n_close_S, IHm.
-Qed.
-
-
-*)
-
 End TargetCalculus.
 
 (* This is duplicated outside of the section so that it's visible

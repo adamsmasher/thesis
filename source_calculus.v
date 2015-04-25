@@ -552,23 +552,6 @@ Proof.
   induction 2 ; eauto using term_full_step.
 Qed.
 
-
-(*
-
-
-Lemma match_trans (e1 e2 e3 : prefix) :
-  e1 ⪯ e2 -> e2 ⪯ e3 -> e1 ⪯ e3.
-Proof.
-  intros. revert e3 H0. induction H ; intros.
-  - constructor.
-  - now subst.
-  - now subst.
-  - inversion H0 ; subst. constructor. apply IHprefix_match. exact H2.
-  - inversion H1 ; subst. constructor ; auto.
-  - inversion H1 ; subst. constructor ; auto.
-  - inversion H1 ; subst. constructor ; auto.
-Qed.*)
-
 End SourceCalculus.
 
 (* Export this notation *)
