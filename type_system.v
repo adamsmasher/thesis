@@ -285,7 +285,7 @@ Qed.
    "[if] every li is an element of ↓l [then] ⌊v⌋↓l equals v" *)
 Lemma filter_list_const L ls k :
   (forall l, In l ls -> precedes l L) ->
-  label_filter (↓L) (apply_labels ls (source_calculus.Const k)) =
+  ⌊apply_labels ls (source_calculus.Const k)⌋(↓L)  =
   apply_labels ls (source_calculus.Const k).
 Proof.
   intro H. induction ls as [|l ls] ; simpl.
@@ -343,7 +343,7 @@ Theorem non_interference (e v : source_calculus.prefix) (l : label) :
   has_type ⦇e⦈ (pair int (lift_label l)) ->
   source_calculus.star e v ->
   source_calculus.is_value v ->
-  source_calculus.star (label_filter (↓l) e) v.
+  source_calculus.star (⌊e⌋↓l) v.
 Proof.
   intros. assert (is_term v) by eauto using term_star.
   apply stability ; try assumption.
