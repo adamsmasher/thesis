@@ -56,7 +56,7 @@ Parameter TS : TypeSystem type has_type lift_label int pair.
    source calculus - that is, we can translate a source calculus
    term and the type of the translated term will tell us the labels
    of the data that the term depends on. As per usual, this key
-   theorem will require a number of lemmas. *)
+   theorem will require a number of auxillary lemmas. *)
 
 (* This lemma extends subject reduction from a single step to
    full sequences. *)
