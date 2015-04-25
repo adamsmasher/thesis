@@ -239,7 +239,7 @@ Proof.
     + repeat constructor. now apply translation_closed_snd, translation_closed.
 Qed.
 
-Definition cone (l : label) := fun (m : label) => if precedes_dec m l then true else false.
+
 
 Inductive label_seq : Type :=
 | LabelSeqEmpty

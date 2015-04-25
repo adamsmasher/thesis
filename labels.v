@@ -18,6 +18,10 @@ Parameter join : label -> label -> label.
 Parameter poset : Poset label precedes.
 Parameter semilattice : UpperSemilattice poset join bottom.
 
+(* TODO: move this to poset? *)
+Definition cone (l : label) := fun (m : label) =>
+  if precedes_dec m l then true else false.
+
 End Labels.
 
 (* Standard join notation. It is placed outside of the section so
