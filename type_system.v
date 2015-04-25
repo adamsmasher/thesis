@@ -313,18 +313,21 @@ Fixpoint lift_labels (ls : list label) : term := match ls with
 | cons l ls' => (Label l) @ (lift_labels ls')
 end.
 
+(* This lemma tells us that there exists a "max" label in a list of
+   labels *)
 Lemma join_labels ls :
-  exists L, (star (lift_labels ls) (Label L)) /\ (forall l, In l ls -> precedes l L).
+  exists L, (star (lift_labels ls) (Label L)) /\
+            (forall l, In l ls -> precedes l L).
 Proof.
-  induction ls ; simpl.
+  induction ls as [|l ls] ; simpl.
   - exists bottom. split.
     + eauto using star.
     + inversion 1.
-  - destruct IHls as [L [H0 H1]]. exists (join a L). split.
+  - destruct IHls as [L [H0 H1]]. exists (join l L). split.
     + eapply star_trans.
        * apply app_star_r. eassumption.
        * apply star_step, FullStep_step. constructor.
-    + intros. destruct (label_eq a l) ; subst ; ainv.
+    + intro l'. destruct (label_eq l l') ; subst ; ainv.
        * apply semilattice.precedes_join.
        * apply semilattice.precedes_join3. apply H1. tauto.
 Qed.
