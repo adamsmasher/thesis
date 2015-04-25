@@ -1,6 +1,7 @@
 (* In this final module, we define the minimum necessary qualities
    a type system (for the target calculus) needs to be able to
-   ensure non-interference with our translation. *)
+   ensure progress, preservation, and non-interference with our
+   translation. *)
 
 Require Import source_calculus.
 Require Import target_calculus.
@@ -52,12 +53,10 @@ Parameter int : type.
 Parameter pair : type -> type -> type.
 Parameter TS : TypeSystem type has_type lift_label int pair.
 
-(* Our primary goal is showing that any type system satisfying the
-   above axioms can be used to enforce non-interference in the
-   source calculus - that is, we can translate a source calculus
-   term and the type of the translated term will tell us the labels
-   of the data that the term depends on. As per usual, this key
-   theorem will require a number of auxillary lemmas. *)
+(* Our first goal is to show that this type system can be used
+   to show progress and preservation for the source calculus -
+   that is, programs whose translation is well-typed do not go wrong.
+*)
 
 (* This lemma extends subject reduction from a single step to
    full sequences. *)
@@ -73,7 +72,7 @@ Qed.
 
 (* This lemma shows subject reduction for the source calculus, based
    on the types of the terms' translations. *)
-Lemma source_subj_red e f t :
+Theorem source_subj_red e f t :
   has_type (translation e) t ->
   source_calculus.full_step e f ->
   has_type (translation f) t.
@@ -83,7 +82,8 @@ Proof.
   eapply eta_type ; eassumption.
 Qed.
 
-(* And, as before, we extend it to the reflexive transitive closure *)
+(* And, as before, we extend it to the reflexive transitive closure,
+   completing our proof of preservation.*)
 Lemma source_subj_red_star e f t :
   has_type (translation e) t ->
   source_calculus.star e f ->
@@ -93,6 +93,64 @@ Proof.
   - assumption.
   - apply IHstar. eapply source_subj_red ; eauto.
 Qed.
+
+Lemma source_progress e t (Hterm : is_term e) (Hclosed : source_calculus.is_closed e) :
+  has_type (translation e) t -> (exists f, source_calculus.cbn e f) \/ source_calculus.is_value e.
+Proof.
+  revert t. induction e ; simpl ; intros.
+  - inversion Hterm.
+  - right. constructor.
+  - inversion Hclosed ; ainv.
+  - right. constructor.
+  - ainv.
+    apply pair_types in H. repeat destruct H. apply app_types in H. repeat destruct H.
+    apply app_types in H1. repeat destruct H1. apply app_types in H0. repeat destruct H0.
+    apply app_types in H0. repeat destruct H0.
+    + assert (exists u, has_type (translation e1) u) by eauto using translate_etas.
+       destruct H9. edestruct IHe1 ; eauto.
+       * destruct H10. left. eauto using source_calculus.cbn.
+       * apply app_types in H7. repeat destruct H7. apply progress in H11. destruct H11.
+       { destruct H11. left. apply appliable_exist_cbn. eapply translation_appliable ; eauto. }
+       { exfalso. eapply app_translation_reducible ; eassumption. }
+       { constructor. }
+       { constructor ; auto using translation_closed_fst, translation_closed. }
+    + constructor.
+    + now apply translation_closed_snd, translation_closed.
+    + constructor.
+       * constructor.
+       * now apply translation_closed_snd, translation_closed.
+    + constructor.
+       * constructor.
+       * constructor ; auto using translation_closed_fst, translation_closed.
+    + now apply translation_closed_fst, translation_closed.
+    + now apply translation_closed.
+    + constructor.
+    + constructor ; auto using translation_closed_fst, translation_closed.
+    + constructor.
+        * constructor.
+        * constructor ; auto using translation_closed_fst, translation_closed.
+    + constructor ; auto using translation_closed_fst, translation_closed_snd, translation_closed, n_closed.
+  - left. esplit. repeat constructor.
+  - ainv.
+    apply pair_types in H. repeat destruct H. apply app_types in H0. repeat destruct H0.
+    + assert (exists u, has_type (translation e) u) by eauto using translate_etas.
+       destruct H4. edestruct IHe ; eauto.
+       * destruct H5. left. eauto using source_calculus.cbn.
+       * right. now constructor.
+    + repeat constructor.
+    + now apply translation_closed_snd, translation_closed.
+    + now apply translation_closed_fst, translation_closed.
+    + repeat constructor. now apply translation_closed_snd, translation_closed.
+Qed.
+
+(* Our final goal is showing that any type system satisfying the
+   above axioms can be used to enforce non-interference in the
+   source calculus - that is, we can translate a source calculus
+   term and the type of the translated term will tell us the labels
+   of the data that the term depends on. As per usual, this key
+   theorem will require a number of auxillary lemmas. *)
+
+
 
 (* As part of the proof of non-interference, we need to talk about
    source calculus terms of the form l1 : l2 : ... : ln : s. The
@@ -292,54 +350,6 @@ Proof.
   intro. induction e1 ; ainv. apply IHe1. rewrite <- H1.  rewrite <- H0. constructor.
 Qed.
 
-Lemma source_progress e t (Hterm : is_term e) (Hclosed : source_calculus.is_closed e) :
-  has_type (translation e) t -> (exists f, source_calculus.cbn e f) \/ source_calculus.is_value e.
-Proof.
-  revert t. induction e ; simpl ; intros.
-  - inversion Hterm.
-  - right. constructor.
-  - inversion Hclosed ; ainv.
-  - right. constructor.
-  - ainv.
-    apply pair_types in H. repeat destruct H. apply app_types in H. repeat destruct H.
-    apply app_types in H1. repeat destruct H1. apply app_types in H0. repeat destruct H0.
-    apply app_types in H0. repeat destruct H0.
-    + assert (exists u, has_type (translation e1) u) by eauto using translate_etas.
-       destruct H9. edestruct IHe1 ; eauto.
-       * destruct H10. left. eauto using source_calculus.cbn.
-       * apply app_types in H7. repeat destruct H7. apply progress in H11. destruct H11.
-       { destruct H11. left. apply appliable_exist_cbn. eapply translation_appliable ; eauto. }
-       { exfalso. eapply app_translation_reducible ; eassumption. }
-       { constructor. }
-       { constructor ; auto using translation_closed_fst, translation_closed. }
-    + constructor.
-    + now apply translation_closed_snd, translation_closed.
-    + constructor.
-       * constructor.
-       * now apply translation_closed_snd, translation_closed.
-    + constructor.
-       * constructor.
-       * constructor ; auto using translation_closed_fst, translation_closed.
-    + now apply translation_closed_fst, translation_closed.
-    + now apply translation_closed.
-    + constructor.
-    + constructor ; auto using translation_closed_fst, translation_closed.
-    + constructor.
-        * constructor.
-        * constructor ; auto using translation_closed_fst, translation_closed.
-    + constructor ; auto using translation_closed_fst, translation_closed_snd, translation_closed, n_closed.
-  - left. esplit. repeat constructor.
-  - ainv.
-    apply pair_types in H. repeat destruct H. apply app_types in H0. repeat destruct H0.
-    + assert (exists u, has_type (translation e) u) by eauto using translate_etas.
-       destruct H4. edestruct IHe ; eauto.
-       * destruct H5. left. eauto using source_calculus.cbn.
-       * right. now constructor.
-    + repeat constructor.
-    + now apply translation_closed_snd, translation_closed.
-    + now apply translation_closed_fst, translation_closed.
-    + repeat constructor. now apply translation_closed_snd, translation_closed.
-Qed.
 
 
 Fixpoint lift_label_seq (ls : label_seq) : term := match ls with
