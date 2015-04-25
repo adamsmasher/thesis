@@ -7,6 +7,7 @@ Require Import target_calculus.
 Require Import translation.
 Require Import labels.
 Require Import Autosubst.
+Require Import List.
 
 (* Following Pottier & Conchon, rather than define a particular
    type system, we simply call for a typing predicate defined over
@@ -142,6 +143,39 @@ Proof.
   - assumption.
   - eapply int_trans_fst_type ; eassumption.
 Qed.
+
+(* This lemma tells us that if every label in a list of labels ls
+   precedes some label L, then applying the label filter operation
+   using the cone of L as the inclusion predicate on a term
+   labeled with ls has no effect. That is, it encodes the following
+   reasoning from Pottier & Conchon's non-inteference proof:
+
+   "[if] every li is an element of ↓l [then] ⌊v⌋↓l equals v" *)
+Lemma filter_list_const L ls k :
+  (forall l, In l ls -> precedes l L) ->
+  label_filter (↓L) (apply_labels ls (source_calculus.Const k)) =
+  apply_labels ls (source_calculus.Const k).
+Proof.
+  intro H. induction ls as [|l ls] ; simpl.
+  - reflexivity.
+  - rewrite IHls.
+    + unfold cone. destruct (precedes_dec l L) as [_|p] ; simpl.
+       * reflexivity.
+       * exfalso. apply p, H. simpl. tauto.
+    + intros. apply H. simpl. tauto.
+Qed.
+
+
+Lemma label_list_thing ls L :
+  has_type (lift_label_seq ls) (lift_label L) ->
+  forall l, (In l ls -> precedes l L).
+Proof.
+  destruct (join_label_list ls) as [L' [H1 H2]]. intro Htype.
+  assert (has_type (Label L') (lift_label L)) by eauto using subj_red_star.
+  assert (precedes L' L) by auto using labels2.
+  intros. apply poset.transitivity with (b := L') ; auto.
+Qed.
+
 
 Theorem non_interference (e v : source_calculus.prefix) (l : label) :
   is_term e ->
@@ -341,27 +375,4 @@ Proof.
     + intros. destruct (label_eq l0 l) ; subst ; ainv.
        * apply semilattice.precedes_join.
        * apply semilattice.precedes_join3. apply H1, H2.
-Qed.
-
-Lemma label_list_thing ls L :
-  has_type (lift_label_seq ls) (lift_label L) -> forall l, member l ls = true -> precedes l L.
-Proof.
-  destruct (join_label_list ls) as [L' [H1 H2]]. intro Htype.
-  assert (has_type (Label L') (lift_label L)) by eauto using subj_red_star.
-  assert (precedes L' L) by auto using labels2.
-  intros. apply poset.transitivity with (b := L') ; auto.
-Qed.
-
-Lemma filter_list_const L ls k :
-  (forall l, member l ls = true -> precedes l L) ->
-  label_filter (cone L) (apply_label_seq ls (source_calculus.Const k)) = apply_label_seq ls (source_calculus.Const k).
-Proof.
-  intros. induction ls ; simpl.
-  - reflexivity.
-  - assert (precedes l L). { apply H. simpl. destruct (label_eq l l) ; auto. }
-    rewrite IHls.
-    + unfold cone. destruct (precedes_dec l L) ; simpl.
-       * reflexivity.
-       * contradiction.
-    + intros. apply H. simpl. rewrite H1. destruct (label_eq l0 l) ; auto.
 Qed.
