@@ -93,6 +93,16 @@ Proof.
   - apply IHstar. eapply source_subj_red ; eauto.
 Qed.
 
+(* As part of the proof of non-interference, we need to talk about
+   source calculus terms of the form l1 : l2 : ... : ln : s. The
+   function apply_labels takes a list of labels [l1;l2;...;ln] and
+   a term s and produces such a term. *)
+Fixpoint apply_labels (ls : list label) (e : prefix) : prefix :=
+match ls with
+| nil => e
+| cons l ls => source_calculus.Label (apply_labels ls e) l
+end.
+
 Theorem non_interference (e v : source_calculus.prefix) (l : label) :
   is_term e ->
   has_type (translation e) (pair int (lift_label l)) ->
@@ -103,7 +113,7 @@ Proof.
   intros. assert (is_term v) by eauto using term_star.
   apply stability ; try assumption.
   assert (has_type (translation v) (pair int (lift_label l))) by eauto using source_subj_red_star.
-  assert (exists ls k, v = apply_label_seq ls (source_calculus.Const k)) by eauto using int_value.
+  assert (exists ls k, v = apply_labels ls (source_calculus.Const k)) by eauto using int_value.
   destruct H5 ; destruct H5. rewrite H5.
   apply filter_list_const. apply label_list_thing.
   apply int_value_translation in H5. rewrite H5 in H4.
@@ -257,16 +267,6 @@ Proof.
     + repeat constructor. now apply translation_closed_snd, translation_closed.
 Qed.
 
-
-
-Inductive label_seq : Type :=
-| LabelSeqEmpty
-| LabelSeqCons (l : label) (ls : label_seq).
-
-Fixpoint apply_label_seq (ls : label_seq) (e : prefix) : prefix := match ls with
-| LabelSeqEmpty => e
-| LabelSeqCons l ls => source_calculus.Label (apply_label_seq ls e) l
-end.
 
 Fixpoint lift_label_seq (ls : label_seq) : term := match ls with
 | LabelSeqEmpty => Label bottom
