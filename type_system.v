@@ -182,7 +182,7 @@ Theorem non_interference (e v : source_calculus.prefix) (l : label) :
   has_type (translation e) (pair int (lift_label l)) ->
   source_calculus.star e v ->
   source_calculus.is_value v ->
-  source_calculus.star (label_filter (cone l) e) v.
+  source_calculus.star (label_filter (↓l) e) v.
 Proof.
   intros. assert (is_term v) by eauto using term_star.
   apply stability ; try assumption.
