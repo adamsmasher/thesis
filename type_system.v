@@ -332,23 +332,29 @@ Proof.
        * apply semilattice.precedes_join3. apply H1. tauto.
 Qed.
 
-Lemma label_list_thing ls L :
+(* this lemma tells us that the type of a list of labels, lifted
+   to a target calculus term, is an upper bound on the labels in
+   the list *)
+Lemma labels_bound ls L :
   has_type (lift_labels ls) (lift_label L) ->
   forall l, (In l ls -> precedes l L).
 Proof.
   destruct (join_labels ls) as [L' [H1 H2]]. intro Htype.
-  assert (has_type (Label L') (lift_label L)) by eauto using subj_red_star.
+  assert (has_type (Label L') (lift_label L))
+    by eauto using subj_red_star.
   assert (precedes L' L) by auto using labels2.
   intros. apply poset.transitivity with (b := L') ; auto.
 Qed.
 
-Lemma int_value_translation v ls k :
-  v = apply_labels ls (source_calculus.Const k) -> ⦇v⦈ = Pair (Const k) (lift_labels ls).
+(* The form of a labeled constant's translation *)
+Lemma int_value_translation ls k :
+  ⦇apply_labels ls (source_calculus.Const k)⦈ =
+  Pair (Const k) (lift_labels ls).
 Proof.
-  revert ls. induction v ; intros ; destruct ls ; ainv.
-  simpl. now erewrite IHv ; auto.
+  induction ls ; simpl.
+  - reflexivity.
+  - now rewrite IHls.
 Qed.
-
 
 Theorem non_interference (e v : source_calculus.prefix) (l : label) :
   is_term e ->
@@ -357,12 +363,13 @@ Theorem non_interference (e v : source_calculus.prefix) (l : label) :
   source_calculus.is_value v ->
   source_calculus.star (⌊e⌋↓l) v.
 Proof.
-  intros. assert (is_term v) by eauto using term_star.
+  intros.
+  assert (is_term v) by eauto using term_star.
+  assert (has_type ⦇v⦈ (pair int (lift_label l))) as H4 by
+    eauto using source_subj_red_star.
+  assert (exists ls k, v = apply_labels ls (source_calculus.Const k))
+    as [ls [k]] by eauto using int_value ; subst.
+  rewrite int_value_translation in H4. apply pairs1 in H4.
   apply stability ; try assumption.
-  assert (has_type ⦇v⦈ (pair int (lift_label l))) by eauto using source_subj_red_star.
-  assert (exists ls k, v = apply_labels ls (source_calculus.Const k)) by eauto using int_value.
-  destruct H5 ; destruct H5. rewrite H5.
-  apply filter_list_const. apply label_list_thing.
-  apply int_value_translation in H5. rewrite H5 in H4.
-  apply pairs1 in H4. destruct H4. apply H6.
+  now apply filter_list_const, labels_bound.
 Qed.
