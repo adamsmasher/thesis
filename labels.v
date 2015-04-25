@@ -27,3 +27,6 @@ End Labels.
 (* Standard join notation. It is placed outside of the section so
    that it can be imported. *)
 Notation "l ⋎ m" := (join l m) (at level 70).
+
+(* Cone notation *)
+Notation "↓ l" := (cone l) (at level 70).
