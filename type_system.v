@@ -103,6 +103,46 @@ match ls with
 | cons l ls => source_calculus.Label (apply_labels ls e) l
 end.
 
+(* The following series of lemmas encodes reasoning used by the
+   Pottier & Conchon paper in their proof of non-interference:
+
+   "...according to axiom 5 [integers], [eta_fst ⦇v⦈] cannot be a
+    λ-abstraction. Considering v is a value, v must be of the form
+    l1 : l2 : ... : ln : k, for some n ≥ 0."
+*)
+Lemma int_value_fst (v : prefix) :
+  source_calculus.is_value v ->
+  has_type (eta_fst (translation v)) int ->
+  exists ls k, v = apply_labels ls (source_calculus.Const k).
+Proof.
+  induction v ; simpl ; intros H H0 ; ainv.
+  - now exists nil, k.
+  - apply integers in H0. ainv.
+  - edestruct IHv as [ls [k]] ; auto. subst.
+    now exists (cons l ls), k.
+Qed.
+
+Lemma int_trans_fst_type (v : prefix) l :
+  source_calculus.is_value v ->
+  has_type (translation v) (pair int l) ->
+  has_type (eta_fst (translation v)) int.
+Proof.
+  destruct v ; simpl ; intros ; ainv.
+  - apply integers ; eauto.
+  - edestruct pairs1 ; eauto.
+  - edestruct pairs1 ; eauto.
+Qed.
+
+Lemma int_value (v : prefix) l :
+  source_calculus.is_value v ->
+  has_type (translation v) (pair int l) ->
+  exists ls k, v = apply_labels ls (source_calculus.Const k).
+Proof.
+  intros. apply int_value_fst.
+  - assumption.
+  - eapply int_trans_fst_type ; eassumption.
+Qed.
+
 Theorem non_interference (e v : source_calculus.prefix) (l : label) :
   is_term e ->
   has_type (translation e) (pair int (lift_label l)) ->
@@ -273,34 +313,7 @@ Fixpoint lift_label_seq (ls : label_seq) : term := match ls with
 | LabelSeqCons l ls' => App (App Join (Label l)) (lift_label_seq ls')
 end.
 
-Lemma int_value_fst (v : prefix) :
-  source_calculus.is_value v -> has_type (eta_fst (translation v)) int -> exists ls k, v = apply_label_seq ls (source_calculus.Const k).
-Proof.
-  induction v ; intros ; ainv.
-  - now exists LabelSeqEmpty, k.
-  - simpl in H0. apply integers in H0. ainv.
-  - edestruct IHv.
-    + assumption.
-    + simpl in H0. assumption.
-    + destruct H as [k H]. rewrite H. now exists (LabelSeqCons l x), k.
-Qed.
 
-Lemma int_trans_fst_type (v : prefix) l :
-  source_calculus.is_term v -> source_calculus.is_value v -> has_type (translation v) (pair int l) -> has_type (eta_fst (translation v)) int.
-Proof.
-  intros. edestruct (translation_pair v).
-  - assumption.
-  - destruct H2 as [x [H2 _]] ; ainv.
-  - destruct H2 as [e1 [e2 H2]]. rewrite H2 in *. simpl. apply pairs1 in H1. tauto.
-Qed.
-
-Lemma int_value (v : prefix) l :
-  source_calculus.is_term v -> source_calculus.is_value v -> has_type (translation v) (pair int l) -> exists ls k, v = apply_label_seq ls (source_calculus.Const k).
-Proof.
-  intros. apply int_value_fst.
-  - assumption.
-  - eapply int_trans_fst_type ; eassumption.
-Qed.
 
 Lemma int_value_translation v ls k :
   v = apply_label_seq ls (source_calculus.Const k) -> translation v = Pair (Const k) (lift_label_seq ls).
